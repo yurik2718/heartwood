@@ -41,6 +41,45 @@ class TreeCameraTest < ApplicationSystemTestCase
     assert fits, "the whole tree should be visible inside the canvas on load"
   end
 
+  test "zoom buttons change the scale around the canvas centre" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
+    assert_selector ".tree-edges path", wait: 5
+
+    scale = -> { page.evaluate_script(
+      "new DOMMatrix(getComputedStyle(document.querySelector('.tree-inner')).transform).a") }
+    before = scale.call
+    find(".tree-zoom button", text: "+").click
+    assert_in_delta before * 1.2, scale.call, 0.01
+
+    find(".tree-zoom button", text: "⌂").click
+    assert_in_delta before, scale.call, 0.05   # fit returns to the fitted scale
+  end
+
+  test "two-pointer pinch zooms the tree" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
+    assert_selector ".tree-edges path", wait: 5
+
+    # Fingers land on empty canvas (bottom-left), spread 100 → 200 px apart.
+    grew = page.evaluate_script(<<~JS)
+      (() => {
+        const canvas = document.querySelector(".tree-canvas")
+        const rect   = canvas.getBoundingClientRect()
+        const before = new DOMMatrix(getComputedStyle(document.querySelector(".tree-inner")).transform).a
+        const ev = (type, id, x, y) => new PointerEvent(type,
+          { pointerId: id, clientX: rect.left + x, clientY: rect.bottom - y, bubbles: true })
+        canvas.dispatchEvent(ev("pointerdown", 1, 20, 20))
+        canvas.dispatchEvent(ev("pointerdown", 2, 120, 20))
+        window.dispatchEvent(ev("pointermove", 2, 220, 20))
+        window.dispatchEvent(ev("pointerup", 1, 20, 20))
+        window.dispatchEvent(ev("pointerup", 2, 220, 20))
+        const after = new DOMMatrix(getComputedStyle(document.querySelector(".tree-inner")).transform).a
+        return { before, after }
+      })()
+    JS
+    assert_in_delta grew["before"] * 2, grew["after"], 0.05,
+      "doubling the finger distance should double the scale"
+  end
+
   test "wheel zoom keeps the point under the cursor fixed" do
     visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
     assert_selector ".tree-edges path", wait: 5

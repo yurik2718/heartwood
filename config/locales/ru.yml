@@ -238,6 +238,9 @@ ru:
     expand: Развернуть ветвь
     collapse: Свернуть ветвь
     add_relative: Добавить
+    zoom_in: Приблизить
+    zoom_out: Отдалить
+    zoom_fit: Показать всё дерево
     ghost_for: "Для: %{name}"
     ghost:
       parent: Добавить родителя

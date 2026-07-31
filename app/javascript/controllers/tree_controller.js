@@ -37,6 +37,7 @@ export default class extends Controller {
   connect() {
     this._scale     = 1
     this._collapsed = new Set()   // ids of units whose children are folded away
+    this._pointers  = new Map()   // active pointers, for one-finger pan / two-finger pinch
     this._build()
     if (!this._units.length) return
 
@@ -50,8 +51,9 @@ export default class extends Controller {
   }
 
   disconnect() {
-    window.removeEventListener("pointermove", this._boundMove)
-    window.removeEventListener("pointerup",   this._boundUp)
+    window.removeEventListener("pointermove",   this._boundMove)
+    window.removeEventListener("pointerup",     this._boundUp)
+    window.removeEventListener("pointercancel", this._boundUp)
   }
 
   // --- Build the unit tree (once) ---------------------------------------------
@@ -467,35 +469,99 @@ export default class extends Controller {
     this.element.addEventListener("wheel",       this._onWheel.bind(this), { passive: false })
     window.addEventListener("pointermove",       this._boundMove)
     window.addEventListener("pointerup",         this._boundUp)
+    window.addEventListener("pointercancel",     this._boundUp)
   }
 
+  // One pointer drags the camera; a second pointer switches to pinch-zoom.
   _onDown(e) {
     if (e.target.closest("a, button, .tree-search, .tree-drawer")) return   // let controls through
     e.preventDefault()
-    this._drag = { x0: e.clientX - this._pan.x, y0: e.clientY - this._pan.y }
+    this._pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (this._pointers.size === 2) {
+      this._drag  = null
+      this._pinch = this._pinchStart()
+    } else if (this._pointers.size === 1) {
+      this._drag = { x0: e.clientX - this._pan.x, y0: e.clientY - this._pan.y }
+    }
   }
 
   _onMove(e) {
-    if (!this._drag) return
-    this._pan.x = e.clientX - this._drag.x0
-    this._pan.y = e.clientY - this._drag.y0
-    this._applyTransform()
+    if (!this._pointers.has(e.pointerId)) return
+    this._pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    if (this._pinch && this._pointers.size >= 2) {
+      // Keep the tree-space point grabbed at pinch start pinned to the moving
+      // midpoint, scaling by the change in finger distance.
+      const { dist, mid } = this._pinchNow()
+      const next = this._clampScale(this._pinch.scale0 * dist / this._pinch.dist0)
+      this._scale = next
+      this._pan   = { x: mid.x - this._pinch.p0.x * next, y: mid.y - this._pinch.p0.y * next }
+      this._applyTransform()
+    } else if (this._drag) {
+      this._pan.x = e.clientX - this._drag.x0
+      this._pan.y = e.clientY - this._drag.y0
+      this._applyTransform()
+    }
   }
 
-  _onUp() { this._drag = null }
+  _onUp(e) {
+    this._pointers.delete(e.pointerId)
+    if (this._pointers.size < 2) this._pinch = null
+    if (this._pointers.size === 1) {
+      // Hand the camera to the remaining finger without a jump.
+      const p = this._pointers.values().next().value
+      this._drag = { x0: p.x - this._pan.x, y0: p.y - this._pan.y }
+    } else if (!this._pointers.size) {
+      this._drag = null
+    }
+  }
+
+  _pinchStart() {
+    const { dist, mid } = this._pinchNow()
+    return {
+      dist0:  dist,
+      scale0: this._scale,
+      p0:     { x: (mid.x - this._pan.x) / this._scale, y: (mid.y - this._pan.y) / this._scale }
+    }
+  }
+
+  _pinchNow() {
+    const [ a, b ] = [ ...this._pointers.values() ]
+    const rect = this.element.getBoundingClientRect()
+    return {
+      dist: Math.hypot(a.x - b.x, a.y - b.y) || 1,
+      mid:  { x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top }
+    }
+  }
 
   // Zoom anchored at the cursor: the tree-space point under the pointer stays put.
   _onWheel(e) {
     e.preventDefault()
     const rect = this.element.getBoundingClientRect()
-    const mx   = e.clientX - rect.left, my = e.clientY - rect.top
-    const next = Math.max(0.2, Math.min(4, this._scale * (e.deltaY < 0 ? 1.1 : 0.9)))
+    this._zoomAt(e.clientX - rect.left, e.clientY - rect.top,
+                 this._scale * (e.deltaY < 0 ? 1.1 : 0.9))
+  }
+
+  // On-canvas zoom buttons (see trees/_canvas).
+  zoomIn()  { this._zoomBy(1.2) }
+  zoomOut() { this._zoomBy(1 / 1.2) }
+  zoomFit() { this._fitToView() }
+
+  _zoomBy(k) {
+    this._zoomAt(this.element.clientWidth / 2, this.element.clientHeight / 2, this._scale * k)
+  }
+
+  // Rescale so the tree-space point at canvas coordinates (mx, my) stays put.
+  _zoomAt(mx, my, scale) {
+    const next = this._clampScale(scale)
     const k    = next / this._scale
     this._pan.x = mx - (mx - this._pan.x) * k
     this._pan.y = my - (my - this._pan.y) * k
     this._scale = next
     this._applyTransform()
   }
+
+  _clampScale(s) { return Math.max(0.2, Math.min(4, s)) }
 
   _applyTransform(animate = false) {
     const inner = this.innerTarget

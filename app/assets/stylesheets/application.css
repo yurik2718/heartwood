@@ -688,6 +688,33 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   25%, 60% { box-shadow: 0 0 0 3px var(--accent); }
 }
 
+/* Zoom buttons — bottom-right of the canvas, under the fingers on touch. */
+.tree-zoom {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.tree-zoom button {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--accent-ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.tree-zoom button:hover { background: var(--accent-wash); border-color: var(--accent); }
+
 /* Slide-over person panel — opens over the canvas when a node is clicked
    (drawer_controller.js + people/panel.html.erb). */
 .tree-drawer {

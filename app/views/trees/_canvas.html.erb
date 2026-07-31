@@ -15,6 +15,12 @@
     <ul class="tree-search-results" data-tree-target="searchResults" hidden></ul>
   </div>
 
+  <div class="tree-zoom">
+    <button type="button" data-action="tree#zoomIn"  aria-label="<%= t("trees.zoom_in") %>"  title="<%= t("trees.zoom_in") %>">+</button>
+    <button type="button" data-action="tree#zoomOut" aria-label="<%= t("trees.zoom_out") %>" title="<%= t("trees.zoom_out") %>">−</button>
+    <button type="button" data-action="tree#zoomFit" aria-label="<%= t("trees.zoom_fit") %>" title="<%= t("trees.zoom_fit") %>">⌂</button>
+  </div>
+
   <%# Slide-over person panel: node links load people#panel into this frame; the
       drawer controller opens on frame load and closes on ✕ / Escape. %>
   <aside class="tree-drawer"

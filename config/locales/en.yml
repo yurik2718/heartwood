@@ -241,6 +241,9 @@ en:
     expand: Expand branch
     collapse: Collapse branch
     add_relative: Add
+    zoom_in: Zoom in
+    zoom_out: Zoom out
+    zoom_fit: Fit the whole tree
     ghost_for: "For: %{name}"
     ghost:
       parent: Add parent

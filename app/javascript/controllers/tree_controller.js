@@ -30,6 +30,7 @@ export default class extends Controller {
   static values  = {
     graph:         Object,
     mode:          String,
+    depth:         Number,
     expandLabel:   String,
     collapseLabel: String
   }
@@ -45,15 +46,63 @@ export default class extends Controller {
     this._toggleLayer.className = "tree-toggles"
     this.innerTarget.appendChild(this._toggleLayer)
 
+    const saved = this._loadState()
+    if (saved) this._restoreCollapsed(saved.collapsed)
     this._relayout()
-    this._fitToView()
+    if (saved?.camera) {
+      this._scale = saved.camera.scale
+      this._pan   = { x: saved.camera.x, y: saved.camera.y }
+      this._applyTransform()
+    } else {
+      this._fitToView()
+    }
     this._bindPanZoom()
   }
 
   disconnect() {
+    clearTimeout(this._persistT)
     window.removeEventListener("pointermove",   this._boundMove)
     window.removeEventListener("pointerup",     this._boundUp)
     window.removeEventListener("pointercancel", this._boundUp)
+  }
+
+  // --- View memory (camera + folded branches, per focus/mode/depth) -----------
+
+  // Units are keyed by their members' ids — stable across page loads, and a
+  // saved state is dropped wholesale when the graph itself changed (someone
+  // was added), so a stale view never hides fresh data.
+  _stateKey() {
+    return `heartwood:tree:${this.graphValue.focus_id}:${this.modeValue}:${this.depthValue}`
+  }
+
+  _unitKey(u) { return u.members.slice().sort((a, b) => a - b).join("+") }
+
+  _loadState() {
+    try {
+      const raw = localStorage.getItem(this._stateKey())
+      if (!raw) return null
+      const state = JSON.parse(raw)
+      return state.n === this.graphValue.nodes.length ? state : null
+    } catch { return null }
+  }
+
+  _restoreCollapsed(keys) {
+    if (!keys?.length) return
+    const byKey = new Map(this._units.map(u => [ this._unitKey(u), u.id ]))
+    for (const k of keys) if (byKey.has(k)) this._collapsed.add(byKey.get(k))
+  }
+
+  _persist() {
+    clearTimeout(this._persistT)
+    this._persistT = setTimeout(() => {
+      try {
+        localStorage.setItem(this._stateKey(), JSON.stringify({
+          n:         this.graphValue.nodes.length,
+          collapsed: [ ...this._collapsed ].map(id => this._unitKey(this._units[id])),
+          camera:    { x: this._pan.x, y: this._pan.y, scale: this._scale }
+        }))
+      } catch {}   // storage full or unavailable — the view just won't be remembered
+    }, 300)
   }
 
   // --- Build the unit tree (once) ---------------------------------------------
@@ -590,5 +639,6 @@ export default class extends Controller {
     inner.style.transition = animate ? "transform .45s ease" : ""
     inner.style.transform =
       `translate(${this._pan.x}px, ${this._pan.y}px) scale(${this._scale})`
+    this._persist()
   }
 }

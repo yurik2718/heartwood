@@ -45,5 +45,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in "password",      with: password
     click_on I18n.t("auth.sign_in_submit")
     assert_selector "h1", text: I18n.t("people.title"), wait: 10
+    # The browser (and its localStorage) outlives the test transaction; record ids
+    # repeat across tests, so a persisted tree view from one test could leak into
+    # the next. Start every test with a clean slate.
+    page.execute_script("localStorage.clear()")
   end
 end

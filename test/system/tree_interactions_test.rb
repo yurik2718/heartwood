@@ -44,6 +44,19 @@ class TreeInteractionsTest < ApplicationSystemTestCase
     assert_not node[:style].to_s.include?("display: none"), "flown-to person should be revealed"
   end
 
+  test "a collapsed branch stays collapsed after a reload (view memory)" do
+    visit clan_tree_path
+    assert_selector ".tree-edges path", wait: 5
+    js_click first(".tree-toggle")
+    assert_selector ".tree-node[data-tree-node-id='#{@hidden.id}'][style*='display: none']",
+      visible: :all, wait: 3
+
+    visit clan_tree_path
+    assert_selector ".tree-edges path", wait: 5
+    assert_selector ".tree-node[data-tree-node-id='#{@hidden.id}'][style*='display: none']",
+      visible: :all, wait: 3
+  end
+
   test "typing a search query dims everyone who does not match" do
     visit clan_tree_path
     assert_selector ".tree-edges path", wait: 5

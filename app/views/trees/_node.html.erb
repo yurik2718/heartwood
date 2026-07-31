@@ -30,7 +30,7 @@
             <% if node[:avatar_url].present? %>
               <%= image_tag node[:avatar_url], class: "node-avatar", alt: node[:name] %>
             <% else %>
-              <span class="node-avatar node-avatar--initials" aria-hidden="true"><%= node[:name].to_s.split.map(&:first).first(2).join.upcase %></span>
+              <span class="node-avatar node-avatar--silhouette" aria-hidden="true"><%= render "people/silhouette", sex: node[:sex] %></span>
             <% end %>
             <div class="node-text">
               <p class="node-name"><%= node[:given].presence || node[:name] %></p>
@@ -43,7 +43,7 @@
           <% if node[:avatar_url].present? %>
             <%= image_tag node[:avatar_url], class: "node-avatar", alt: node[:name] %>
           <% else %>
-            <span class="node-avatar node-avatar--initials" aria-hidden="true"><%= node[:name].to_s.split.map(&:first).first(2).join.upcase %></span>
+            <span class="node-avatar node-avatar--silhouette" aria-hidden="true"><%= render "people/silhouette", sex: node[:sex] %></span>
           <% end %>
           <div class="node-text">
             <%# Given names over surname so full names stay readable inside the

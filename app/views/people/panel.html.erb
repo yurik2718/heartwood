@@ -9,7 +9,7 @@
       <% if @person.avatar.attached? %>
         <%= image_tag @person.avatar, class: "person-panel-avatar", alt: @person.display_name %>
       <% else %>
-        <span class="person-panel-avatar person-panel-avatar--initials" aria-hidden="true"><%= @person.display_name.split.map(&:first).first(2).join.upcase %></span>
+        <span class="person-panel-avatar person-panel-avatar--silhouette" aria-hidden="true"><%= render "people/silhouette", sex: @person.sex %></span>
       <% end %>
       <h2 class="person-panel-name"><%= @person.display_name %></h2>
       <% if @person.life_years %>

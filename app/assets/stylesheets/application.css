@@ -478,7 +478,7 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   }
 }
 
-/* Avatar inside a tree node — photo or initials fallback. */
+/* Avatar inside a tree node — photo, or an outline silhouette tinted by sex. */
 .node-avatar {
   flex: 0 0 auto;
   width: 2.75rem;
@@ -487,16 +487,16 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   object-fit: cover;
 }
 .tree-node--circle .node-avatar { width: 2.5rem; height: 2.5rem; }
-.node-avatar--initials {
+.node-avatar--silhouette {
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg);
   color: var(--muted);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
 }
+.node-avatar--silhouette svg { width: 72%; height: 72%; }
+.tree-node--m .node-avatar--silhouette { color: #6b9fb8; }
+.tree-node--f .node-avatar--silhouette { color: #b87ca0; }
 .node-text { min-width: 0; }
 
 /* Sex tones: the card band and the circle ring pick up the colour. */
@@ -768,15 +768,16 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   box-shadow: 0 0 0 4px rgba(255,255,255,.85);
   margin: 0 auto 0.75rem;
 }
-.person-panel-avatar--initials {
+.person-panel-avatar--silhouette {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: #fff;
   color: var(--muted);
-  font-size: 1.5rem;
-  font-weight: 600;
 }
+.person-panel-avatar--silhouette svg { width: 64%; height: 64%; }
+.person-panel-head--m .person-panel-avatar--silhouette { color: #6b9fb8; }
+.person-panel-head--f .person-panel-avatar--silhouette { color: #b87ca0; }
 
 .person-panel-name  { margin: 0; font-size: 1.15rem; }
 .person-panel-years { margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.9; }

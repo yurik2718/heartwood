@@ -108,6 +108,11 @@ class TreesControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-tree-graph-value*='unions']"
   end
 
+  test "a node without a photo renders an outline silhouette, not initials" do
+    get person_tree_url(@person)
+    assert_select ".tree-node--focus .node-avatar--silhouette svg"
+  end
+
   test "renders an add-parent ghost slot for an ancestor without parents" do
     get person_tree_url(@person)   # Bach has no parents recorded
     assert_select ".tree-node--ghost a[href*='/relatives/new'][href*='relation=parent']"

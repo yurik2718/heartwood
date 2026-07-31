@@ -509,6 +509,79 @@ export default class extends Controller {
 
   _sexRank(node) { return node?.sex === "M" ? 0 : node?.sex === "F" ? 1 : 2 }
 
+  // --- Keyboard navigation ------------------------------------------------------
+
+  // Arrows walk the family (left/right: partner or sibling; up/down: across
+  // generations, spatially), Enter opens the highlighted person's panel,
+  // +/− zoom. The canvas div carries tabindex=0 (see trees/_canvas).
+  keydown(e) {
+    if (e.target.closest("input, textarea, select, [contenteditable]")) return
+    if (e.key === "+" || e.key === "=") { e.preventDefault(); return this.zoomIn() }
+    if (e.key === "-")                  { e.preventDefault(); return this.zoomOut() }
+    if (![ "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter" ].includes(e.key)) return
+    e.preventDefault()
+
+    if (!this._kb) this._kb = this._kbStart()
+    if (e.key === "Enter") { this._kbEl()?.querySelector("a")?.click(); return }
+
+    const next = this._kbNext(e.key)
+    if (next) this._kb = next
+    this._kbHighlight()
+  }
+
+  _kbStart() {
+    const u = this._unitOf.get(this.graphValue.focus_id) || this._root
+    return { u, m: Math.max(0, u.members.indexOf(this.graphValue.focus_id)) }
+  }
+
+  // Spatially honest steps: in ancestors mode the layout's "children" sit above.
+  _kbNext(key) {
+    const { u, m } = this._kb
+    const upIsChild = this.modeValue === "ancestors"
+    const toParent  = () => u.parent?.visible ? { u: u.parent, m: 0 } : null
+    const toChild   = () => {
+      if (this._collapsed.has(u.id)) return null
+      const c = u.children.find(c => c.visible)
+      return c ? { u: c, m: 0 } : null
+    }
+
+    switch (key) {
+      case "ArrowUp":   return upIsChild ? toChild()  : toParent()
+      case "ArrowDown": return upIsChild ? toParent() : toChild()
+      case "ArrowLeft":
+      case "ArrowRight": {
+        const dir = key === "ArrowLeft" ? -1 : 1
+        if (u.members.length === 2 && (m + dir === 0 || m + dir === 1)) return { u, m: m + dir }
+        const sibs = u.parent ? u.parent.children.filter(c => c.visible) : [ u ]
+        const next = sibs[sibs.indexOf(u) + dir]
+        return next ? { u: next, m: dir === -1 ? next.members.length - 1 : 0 } : null
+      }
+    }
+  }
+
+  _kbEl() {
+    const id = this._kb.u.members[this._kb.m]
+    return this.nodeTargets.find(el => +el.dataset.treeNodeId === id)
+  }
+
+  _kbHighlight() {
+    for (const el of this.nodeTargets) el.classList.remove("tree-node--kb")
+    const el = this._kbEl()
+    if (!el) return
+    el.classList.add("tree-node--kb")
+
+    // Follow with the camera when the highlight leaves the viewport.
+    const id = this._kb.u.members[this._kb.m]
+    const p  = this._pos[id]
+    if (!p) return
+    const sx = this._pan.x + p.cx * this._scale
+    const sy = this._pan.y + (p.y + p.h / 2) * this._scale
+    const vw = this.element.clientWidth, vh = this.element.clientHeight
+    if (sx < 60 || sx > vw - 60 || sy < 60 || sy > vh - 60) {
+      this._panTo(p.cx, p.y + p.h / 2, true)
+    }
+  }
+
   // --- Camera (pan & zoom) ----------------------------------------------------
 
   // Initial camera: zoom out (never in) until the whole tree fits the canvas,

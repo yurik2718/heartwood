@@ -686,6 +686,10 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 
 /* Live search: non-matching people fade back so matches pop on the canvas. */
 .tree-node--dim { opacity: 0.25; transition: opacity 0.2s ease; }
+
+/* Keyboard navigation: the walked node, and a visible focus ring on the canvas. */
+.tree-node--kb { outline: 2px dashed var(--accent); outline-offset: 3px; }
+.tree-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tree-search-results li:hover,
 .tree-search-results li:focus { background: var(--accent-wash); outline: none; }
 

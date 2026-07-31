@@ -1,6 +1,10 @@
 <%# locals: graph (graph hash), mode (string), depth (integer), focus_id (id of the highlighted person) %>
 <div class="tree-canvas"
+     tabindex="0"
+     role="application"
+     aria-label="<%= t("trees.canvas_label") %>"
      data-controller="tree"
+     data-action="keydown->tree#keydown"
      data-tree-graph-value="<%= graph.to_json %>"
      data-tree-mode-value="<%= mode %>"
      data-tree-depth-value="<%= depth %>"

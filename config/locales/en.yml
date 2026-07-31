@@ -230,7 +230,8 @@ en:
     title: "%{name} — Family Tree"
     ancestors: Ancestors
     descendants: Descendants
-    hint: "Scroll to zoom · drag to pan · click a person for details"
+    hint: "Scroll to zoom · drag to pan · click a person for details · arrow keys to navigate"
+    canvas_label: "Family tree: arrow keys walk between relatives, Enter opens the person card, plus and minus zoom"
     close_panel: Close panel
     depth_label: Generations
     default_name: My Tree

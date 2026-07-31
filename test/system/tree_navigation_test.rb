@@ -43,6 +43,20 @@ class TreeNavigationTest < ApplicationSystemTestCase
     assert_selector ".tree-node--focus .node-name", text: "Pat"
   end
 
+  test "arrow keys walk to a relative and Enter opens their panel" do
+    visit person_tree_path(@focus)
+    assert_selector ".tree-edges path", wait: 5
+
+    page.execute_script("document.querySelector('.tree-canvas').focus()")
+    canvas = find(".tree-canvas")
+    canvas.send_keys :arrow_up   # ancestors mode: up goes to the parent above
+    assert_selector ".tree-node--kb .node-name", text: "Pat"
+
+    canvas.send_keys :enter
+    assert_selector ".tree-drawer--open", wait: 5
+    assert_selector ".person-panel-name", text: "Pat Parent"
+  end
+
   test "closing the panel empties the frame so the same person can be reopened" do
     visit person_tree_path(@focus)
     assert_selector ".tree-edges path", wait: 5

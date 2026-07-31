@@ -509,6 +509,30 @@ export default class extends Controller {
 
   _sexRank(node) { return node?.sex === "M" ? 0 : node?.sex === "F" ? 1 : 2 }
 
+  // --- Print --------------------------------------------------------------------
+
+  // Scale the whole tree to the printable page width, print, then restore the
+  // camera. The print stylesheet hides every control and unclips the canvas.
+  print() {
+    const restore = { pan: { ...this._pan }, scale: this._scale }
+    const after = () => {
+      window.removeEventListener("afterprint", after)
+      this.element.classList.remove("tree-canvas--print")
+      this._pan   = restore.pan
+      this._scale = restore.scale
+      this._applyTransform()
+    }
+    window.addEventListener("afterprint", after)
+
+    this.element.classList.add("tree-canvas--print")
+    const pageWidth = 720   // ≈ 190mm printable width at 96dpi
+    this._scale = Math.min(1, pageWidth / this.innerTarget.offsetWidth)
+    this._pan   = { x: 0, y: 0 }
+    this._applyTransform()
+    this.element.style.setProperty("--print-h", `${this.innerTarget.offsetHeight * this._scale}px`)
+    window.print()
+  }
+
   // --- Keyboard navigation ------------------------------------------------------
 
   // Arrows walk the family (left/right: partner or sibling; up/down: across

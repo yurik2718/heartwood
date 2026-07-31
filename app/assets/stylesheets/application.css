@@ -717,6 +717,26 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 .tree-minimap--hidden { display: none; }
 
+/* Print: only the tree itself, scaled to the page width (tree#print sets the
+   camera and --print-h before calling window.print). */
+@media print {
+  .site-header,
+  .page-head .actions,
+  .tree-hint,
+  .tree-search,
+  .tree-zoom,
+  .tree-minimap,
+  .tree-toggles,
+  .tree-drawer { display: none !important; }
+
+  .tree-canvas {
+    overflow: visible;
+    border: none;
+    min-height: 0;
+  }
+  .tree-canvas--print { height: var(--print-h, auto); }
+}
+
 /* Zoom buttons — bottom-right of the canvas, under the fingers on touch. */
 .tree-zoom {
   position: absolute;

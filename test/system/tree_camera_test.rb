@@ -125,6 +125,29 @@ class TreeCameraTest < ApplicationSystemTestCase
     assert moved, "clicking the mini map should move the camera"
   end
 
+  test "print scales the tree to page width and restores the camera after" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 3)
+    assert_selector ".tree-edges path", wait: 5
+
+    result = page.evaluate_script(<<~JS)
+      (() => {
+        window.print = () => {}   // headless: no dialog, just the setup around it
+        const inner  = document.querySelector(".tree-inner")
+        const before = getComputedStyle(inner).transform
+        document.querySelector(".tree-print-btn").click()
+        const during = {
+          printing: document.querySelector(".tree-canvas--print") !== null,
+          origin:   new DOMMatrix(getComputedStyle(inner).transform).e === 0
+        }
+        window.dispatchEvent(new Event("afterprint"))
+        return { ...during, restored: getComputedStyle(inner).transform === before }
+      })()
+    JS
+    assert result["printing"], "print mode class should be set"
+    assert result["origin"],   "tree should be moved to the page origin for print"
+    assert result["restored"], "camera should be restored after printing"
+  end
+
   test "wheel zoom keeps the point under the cursor fixed" do
     visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
     assert_selector ".tree-edges path", wait: 5

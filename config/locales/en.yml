@@ -245,6 +245,7 @@ en:
     zoom_in: Zoom in
     zoom_out: Zoom out
     zoom_fit: Fit the whole tree
+    print: Print the tree
     ghost_for: "For: %{name}"
     ghost:
       parent: Add parent

@@ -670,14 +670,22 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   overflow: auto;
 }
 .tree-search-results li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
   padding: 0.35rem 0.5rem;
   border-radius: 6px;
   font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
+.tree-search-results li span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.tree-search-years { flex: 0 0 auto; color: var(--muted); font-size: 0.75rem; }
+
+/* Live search: non-matching people fade back so matches pop on the canvas. */
+.tree-node--dim { opacity: 0.25; transition: opacity 0.2s ease; }
 .tree-search-results li:hover,
 .tree-search-results li:focus { background: var(--accent-wash); outline: none; }
 

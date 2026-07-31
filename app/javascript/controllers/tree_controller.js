@@ -356,22 +356,42 @@ export default class extends Controller {
     const list = this.searchResultsTarget
     list.innerHTML = ""
 
-    const matches = q
+    const found = q
       ? this.graphValue.nodes
           .filter(n => !n.living && !n.ghost && n.name && n.name.toLowerCase().includes(q))
-          .slice(0, 8)
       : []
 
+    // While a query is live, everyone who doesn't match fades back — the
+    // matches stay bright on the canvas (Balkan's .match/.no-match idea).
+    this._dimExcept(q ? new Set(found.map(n => n.id)) : null)
+
+    const matches = found.slice(0, 8)
     if (!matches.length) { list.hidden = true; return }
     for (const m of matches) {
       const li = document.createElement("li")
-      li.textContent = m.name
+      const name = document.createElement("span")
+      name.textContent = m.name
+      li.appendChild(name)
+      if (m.years) {
+        const years = document.createElement("span")
+        years.className = "tree-search-years"
+        years.textContent = m.years
+        li.appendChild(years)
+      }
       li.tabIndex = 0
       li.addEventListener("click", () => this._flyTo(m.id))
       li.addEventListener("keydown", (e) => { if (e.key === "Enter") this._flyTo(m.id) })
       list.appendChild(li)
     }
     list.hidden = false
+  }
+
+  // Fade every node not in `matchIds`; null restores everyone.
+  _dimExcept(matchIds) {
+    for (const el of this.nodeTargets) {
+      const id = +el.dataset.treeNodeId
+      el.classList.toggle("tree-node--dim", !!matchIds && !matchIds.has(id))
+    }
   }
 
   searchKeys(e) {
@@ -412,6 +432,7 @@ export default class extends Controller {
     this.searchInputTarget.value = ""
     this.searchResultsTarget.hidden = true
     this.searchResultsTarget.innerHTML = ""
+    this._dimExcept(null)
   }
 
   _sexRank(node) { return node?.sex === "M" ? 0 : node?.sex === "F" ? 1 : 2 }

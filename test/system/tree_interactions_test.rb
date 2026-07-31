@@ -44,6 +44,19 @@ class TreeInteractionsTest < ApplicationSystemTestCase
     assert_not node[:style].to_s.include?("display: none"), "flown-to person should be revealed"
   end
 
+  test "typing a search query dims everyone who does not match" do
+    visit clan_tree_path
+    assert_selector ".tree-edges path", wait: 5
+
+    find(".tree-search-input").set("Gregor")
+    assert_selector ".tree-search-results li", text: "Gregor", wait: 3
+    assert_selector ".tree-node--dim", minimum: 1
+    assert_no_selector ".tree-node--dim[data-tree-node-id='#{@hidden.id}']"
+
+    find(".tree-search-input").set("")
+    assert_no_selector ".tree-node--dim"
+  end
+
   private
 
   def person(name, sex)

@@ -84,15 +84,15 @@ class TreesControllerTest < ActionDispatch::IntegrationTest
     assert_select "span.button--disabled", text: "+"
   end
 
-  test "node link goes to tree path for refocus (not profile)" do
+  test "node link loads the person panel into the drawer frame" do
     parent = Person.create!(sex: "M", tree: @tree)
     fam = Family.create!(tree: @tree)
     fam.partners << parent
     fam.children << @person
 
     get person_tree_url(@person, depth: 1)
-    # Each visible non-focus node should link to person_tree_path, not person_path
-    assert_select ".tree-node:not(.tree-node--focus) a[href*='/tree']"
+    # Nodes open the slide-over panel (turbo-frame), not a full-page navigation.
+    assert_select ".tree-node:not(.tree-node--focus) a[href*='/panel'][data-turbo-frame='person-panel']"
   end
 
   test "descendants view renders the married-in spouse as a couple" do
@@ -108,14 +108,13 @@ class TreesControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-tree-graph-value*='unions']"
   end
 
-  test "non-focus nodes link to that person's tree for refocus" do
+  test "non-focus nodes link to their panel card" do
     child = Person.create!(sex: "F", tree: @tree)
     fam = Family.create!(tree: @tree)
     fam.partners << @person
     fam.children << child
 
     get person_tree_url(@person, mode: "descendants", depth: 1)
-    # Child node must link to the child's tree path (refocus), not their profile
-    assert_select ".tree-node:not(.tree-node--focus) a[href*='/tree']"
+    assert_select ".tree-node:not(.tree-node--focus) a[href*='/panel']"
   end
 end

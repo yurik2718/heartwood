@@ -230,7 +230,8 @@ en:
     title: "%{name} — Family Tree"
     ancestors: Ancestors
     descendants: Descendants
-    hint: "Scroll to zoom · drag to pan · click a node to refocus"
+    hint: "Scroll to zoom · drag to pan · click a person for details"
+    close_panel: Close panel
     depth_label: Generations
     default_name: My Tree
     clan_link: Family tree

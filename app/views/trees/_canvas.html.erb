@@ -15,6 +15,14 @@
     <ul class="tree-search-results" data-tree-target="searchResults" hidden></ul>
   </div>
 
+  <%# Slide-over person panel: node links load people#panel into this frame; the
+      drawer controller opens on frame load and closes on ✕ / Escape. %>
+  <aside class="tree-drawer"
+         data-controller="drawer"
+         data-action="keydown.esc@window->drawer#close">
+    <%= turbo_frame_tag "person-panel", target: "_top", data: { drawer_target: "frame" } %>
+  </aside>
+
   <div class="tree-inner" data-tree-target="inner">
     <svg class="tree-edges" data-tree-target="svg" aria-hidden="true"></svg>
     <div class="tree-nodes-layer">

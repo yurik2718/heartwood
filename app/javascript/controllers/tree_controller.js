@@ -4,22 +4,26 @@ import { Controller } from "@hotwired/stimulus"
 // Generations are horizontal rows; within a row, X comes from a post-order pass so
 // parents sit centred over their children and sibling subtrees never overlap.
 //
-// The layout works on *units*: a couple (two partner cards joined by a short
-// connector) or a lone person. Without `unions` every unit is a singleton, so this
-// is a plain tidy tree; with `unions`, couples lay out as one block of two cards.
+// The layout works on *units*: a couple (two cards joined by a bond line with a
+// ♥) or a lone person (a circle). Without `unions` every unit is a singleton, so
+// this is a plain tidy tree; with `unions`, couples lay out as one block of two.
 //
 // On top of the layout: collapse/expand of branches and a search box that flies the
 // camera to a person (expanding the path to them first). Units are built once; a
 // collapse/expand only re-runs the cheap positioning pass.
 
-const NODE_W      = 210   // card width (keep in sync with .tree-node in application.css)
-const NODE_H      = 88    // card height (name wrapping to 2 lines + surname + dates)
+// Nodes come in two shapes (keep sizes in sync with application.css): couple
+// members are rectangular cards, singles are circles. Units therefore have
+// per-shape widths and heights; rows take the height of their tallest unit.
+const CARD_W      = 210   // .tree-node--card width
+const CARD_H      = 100   // .tree-node--card height (band + name + dates)
+const CIRC_D      = 160   // .tree-node--circle diameter
 const MIN_FIT     = 0.35  // fit-to-view floor — below this a huge tree is confetti
-const PAIR_GAP    = 20    // gap between the two cards of a couple
+const PAIR_GAP    = 26    // gap between the two cards of a couple (fits the ♥)
 const SIBLING_GAP = 40    // gap between adjacent units in a row
-const ROW_GAP     = 64    // vertical gap between generation rows
-const ROW_H       = NODE_H + ROW_GAP
+const ROW_GAP     = 70    // vertical gap between generation rows
 const PAD         = 60    // breathing room around the laid-out tree
+const SVG_NS      = "http://www.w3.org/2000/svg"
 
 export default class extends Controller {
   static targets = ["inner", "svg", "node", "searchInput", "searchResults"]
@@ -170,46 +174,63 @@ export default class extends Controller {
 
   // Rows from generation, over the visible units only — folding a deep branch
   // compacts the tree vertically. Descendants grow down, ancestors grow up.
+  // Rows are as tall as their tallest unit (cards and circles mix freely);
+  // shorter units are centred vertically within their row.
   _assignY() {
     const vis    = this._units.filter(u => u.visible)
     const maxGen = Math.max(...vis.map(u => this._gen(u)))
+    const rowOf  = u => this.modeValue === "ancestors" ? maxGen - this._gen(u) : this._gen(u)
+
+    const rowH = []
     for (const u of vis) {
-      const g = this._gen(u)
-      u.y = (this.modeValue === "ancestors" ? maxGen - g : g) * ROW_H
+      u.h = this._unitHeight(u)
+      const r = rowOf(u)
+      rowH[r] = Math.max(rowH[r] || 0, u.h)
+    }
+
+    const rowY = []
+    let y = 0
+    for (let r = 0; r < rowH.length; r++) { rowY[r] = y; y += (rowH[r] || 0) + ROW_GAP }
+
+    for (const u of vis) {
+      const r = rowOf(u)
+      u.y = rowY[r] + (rowH[r] - u.h) / 2
     }
   }
 
   _gen(u)        { return this._nodeById.get(u.members[0]).generation }
-  _unitWidth(u)  { return u.members.length === 2 ? NODE_W * 2 + PAIR_GAP : NODE_W }
+  _unitWidth(u)  { return u.members.length === 2 ? CARD_W * 2 + PAIR_GAP : CIRC_D }
+  _unitHeight(u) { return u.members.length === 2 ? CARD_H : CIRC_D }
 
-  // Resolve visible units into per-card top-left positions, then normalise so the
-  // tree starts at (PAD, PAD) — unit centres can go negative after shifts.
+  // Resolve visible units into per-node positions (with each node's own size),
+  // then normalise so the tree starts at (PAD, PAD) — unit centres can go
+  // negative after shifts.
   _placeCards() {
     const pos = {}
     const vis = this._units.filter(u => u.visible)
     for (const u of vis) {
       if (u.members.length === 2) {
-        const off = (NODE_W + PAIR_GAP) / 2
-        pos[u.members[0]] = { cx: u.cx - off, y: u.y }
-        pos[u.members[1]] = { cx: u.cx + off, y: u.y }
+        const off = (CARD_W + PAIR_GAP) / 2
+        pos[u.members[0]] = { cx: u.cx - off, y: u.y, w: CARD_W, h: CARD_H }
+        pos[u.members[1]] = { cx: u.cx + off, y: u.y, w: CARD_W, h: CARD_H }
       } else {
-        pos[u.members[0]] = { cx: u.cx, y: u.y }
+        pos[u.members[0]] = { cx: u.cx, y: u.y, w: CIRC_D, h: CIRC_D }
       }
     }
 
     const cards = Object.values(pos)
-    const minX  = Math.min(...cards.map(p => p.cx - NODE_W / 2))
+    const minX  = Math.min(...cards.map(p => p.cx - p.w / 2))
     const minY  = Math.min(...vis.map(u => u.y))
     const dx = PAD - minX, dy = PAD - minY
-    for (const p of cards) { p.cx += dx; p.x = p.cx - NODE_W / 2; p.y += dy }
+    for (const p of cards) { p.cx += dx; p.x = p.cx - p.w / 2; p.y += dy }
     for (const u of vis)   { u.cx += dx; u.y += dy }
     return pos
   }
 
   _resize() {
     const cards = Object.values(this._pos)
-    const maxX  = Math.max(...cards.map(p => p.x + NODE_W))
-    const maxY  = Math.max(...this._units.filter(u => u.visible).map(u => u.y)) + NODE_H
+    const maxX  = Math.max(...cards.map(p => p.x + p.w))
+    const maxY  = Math.max(...this._units.filter(u => u.visible).map(u => u.y + u.h))
     const w = maxX + PAD, h = maxY + PAD
     this.innerTarget.style.width  = `${w}px`
     this.innerTarget.style.height = `${h}px`
@@ -241,28 +262,47 @@ export default class extends Controller {
     }
   }
 
-  // Short horizontal line joining the two partner cards of a couple — drawn thicker
-  // than descent edges so marriage reads differently from parent-child.
+  // Short horizontal line joining the two partner cards of a couple, with a ♥
+  // marker in the gap between them — marriage reads differently from descent.
   _connector(u) {
     const [a, b] = u.members
-    const x1 = this._pos[a].cx + NODE_W / 2
-    const x2 = this._pos[b].cx - NODE_W / 2
-    const y  = u.y + NODE_H / 2
+    const x1 = this._pos[a].cx + this._pos[a].w / 2
+    const x2 = this._pos[b].cx - this._pos[b].w / 2
+    const y  = u.y + u.h / 2
     this._path(`M${x1},${y} L${x2},${y}`, "tree-edge tree-edge--bond")
+    this._heart(u.cx, y)
   }
 
-  // Vertical bézier from a parent unit to a child unit, in the growth direction.
+  _heart(x, y) {
+    const bg = document.createElementNS(SVG_NS, "circle")
+    bg.setAttribute("cx", x)
+    bg.setAttribute("cy", y)
+    bg.setAttribute("r", 10)
+    bg.setAttribute("class", "tree-heart-bg")
+    const glyph = document.createElementNS(SVG_NS, "text")
+    glyph.setAttribute("x", x)
+    glyph.setAttribute("y", y)
+    glyph.setAttribute("class", "tree-heart")
+    glyph.textContent = "♥"
+    this.svgTarget.append(bg, glyph)
+  }
+
+  // Orthogonal elbow from a parent unit to a child unit, in the growth direction.
+  // A couple's line starts at the bond midpoint and runs through the gap between
+  // the partner cards; a single's line starts at the circle's edge.
   _link(parent, child) {
     const px = parent.cx, cx = child.cx
-    const dir = Math.sign((child.y + NODE_H / 2) - (parent.y + NODE_H / 2)) || 1
-    const y1  = parent.y + NODE_H / 2 + dir * NODE_H / 2
-    const y2  = child.y  + NODE_H / 2 - dir * NODE_H / 2
-    const my  = (y1 + y2) / 2
-    this._path(`M${px},${y1} C${px},${my} ${cx},${my} ${cx},${y2}`)
+    const py = parent.y + parent.h / 2, cy = child.y + child.h / 2
+    const dir  = Math.sign(cy - py) || 1
+    const edge = py + dir * parent.h / 2            // parent's growth-facing edge
+    const y1   = parent.members.length === 2 ? py : edge
+    const y2   = cy - dir * child.h / 2
+    const my   = (edge + y2) / 2                    // bus line sits between the rows
+    this._path(`M${px},${y1} L${px},${my} L${cx},${my} L${cx},${y2}`)
   }
 
   _path(d, cls = "tree-edge") {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    const path = document.createElementNS(SVG_NS, "path")
     path.setAttribute("d", d)
     path.setAttribute("class", cls)
     this.svgTarget.appendChild(path)
@@ -286,7 +326,7 @@ export default class extends Controller {
       btn.setAttribute("aria-label", label)
       btn.title = label
       btn.style.left = `${u.cx}px`
-      btn.style.top  = `${u.y + NODE_H / 2 + dir * (NODE_H / 2 + 12)}px`
+      btn.style.top  = `${u.y + u.h / 2 + dir * (u.h / 2 + 14)}px`
       btn.addEventListener("click", (e) => { e.stopPropagation(); this._toggle(u.id) })
       this._toggleLayer.appendChild(btn)
     }
@@ -342,7 +382,7 @@ export default class extends Controller {
     this._relayout()
     this._scale = 1
     const p = this._pos[id]
-    if (p) this._panTo(p.cx, p.y + NODE_H / 2, true)
+    if (p) this._panTo(p.cx, p.y + p.h / 2, true)
     this._flash(id)
     this._clearSearch()
   }
@@ -390,7 +430,7 @@ export default class extends Controller {
 
   _centerOn(focusId, animate = false) {
     const p = this._pos[focusId]
-    if (p) this._panTo(p.cx, p.y + NODE_H / 2, animate)
+    if (p) this._panTo(p.cx, p.y + p.h / 2, animate)
   }
 
   // Place a tree-space point at the centre of the viewport.
@@ -406,14 +446,14 @@ export default class extends Controller {
   _anchorScreen() {
     const p = this._pos[this.graphValue.focus_id]
     if (!p) return null
-    return { sx: this._pan.x + p.cx * this._scale, sy: this._pan.y + (p.y + NODE_H / 2) * this._scale }
+    return { sx: this._pan.x + p.cx * this._scale, sy: this._pan.y + (p.y + p.h / 2) * this._scale }
   }
 
   _restoreAnchor(a) {
     if (!a) return
     const p = this._pos[this.graphValue.focus_id]
     if (!p) return
-    this._pan = { x: a.sx - p.cx * this._scale, y: a.sy - (p.y + NODE_H / 2) * this._scale }
+    this._pan = { x: a.sx - p.cx * this._scale, y: a.sy - (p.y + p.h / 2) * this._scale }
   }
 
   _bindPanZoom() {
@@ -426,7 +466,7 @@ export default class extends Controller {
   }
 
   _onDown(e) {
-    if (e.target.closest("a, button, .tree-search")) return   // let controls through
+    if (e.target.closest("a, button, .tree-search, .tree-drawer")) return   // let controls through
     e.preventDefault()
     this._drag = { x0: e.clientX - this._pan.x, y0: e.clientY - this._pan.y }
   }

@@ -78,6 +78,16 @@ class Person < ApplicationRecord
     !living? && !private?
   end
 
+  # Compact lifespan for headers and tree nodes: "1799 – 1837", a lone birth year,
+  # or "† 1837" when only the death is known. Nil when no dates are recorded.
+  def life_years
+    birth_year = event_year(birth)
+    death_year = event_year(death)
+    return "#{birth_year} – #{death_year}" if birth_year && death_year
+    return birth_year.to_s if birth_year
+    "† #{death_year}" if death_year
+  end
+
   # --- Derived relationships (computed through Family; see relationship.md) ---
 
   # Partners of the family this person is a child of.
@@ -181,7 +191,12 @@ class Person < ApplicationRecord
     # In descendants mode this also pulls in spouses who married into the line.
     unions = collect_unions(persons:, gens:, orders:, gen_counts:, mode:)
 
-    nodes = persons.values.map { |p| node_data(p, generation: gens[p.id], order: orders[p.id]) }
+    # Couple members render as banded cards, everyone else as circles — the shape
+    # must match the JS unit grouping, so it is derived from the same unions.
+    partnered = unions.flat_map { |u| u[:partner_ids] }.to_set
+    nodes = persons.values.map do |p|
+      node_data(p, generation: gens[p.id], order: orders[p.id], partnered: partnered.include?(p.id))
+    end
     { nodes:, edges:, unions:, persons:, focus_id: id, mode: }
   end
 
@@ -245,14 +260,20 @@ class Person < ApplicationRecord
     end
   end
 
-  def node_data(person, generation:, order:)
-    base = { id: person.id, generation:, order: }
+  def node_data(person, generation:, order:, partnered: false)
+    base = { id: person.id, generation:, order:, partnered: }
     unless person.visible_to?(Current.user)
-      return base.merge(name: I18n.t("people.living"), birth_year: nil, sex: nil, living: true)
+      return base.merge(name: I18n.t("people.living"), years: nil, sex: nil, living: true)
     end
     base.merge(name: person.display_name, given: person.given_names, surname: person.surname,
-               birth_year: person.birth&.date_raw,
+               years: person.life_years,
                sex: person.sex, avatar_url: avatar_url_for(person))
+  end
+
+  # The compact year for the lifespan line: the parsed year when the date parsed,
+  # otherwise the raw string as typed ("ок. 1696").
+  def event_year(event)
+    event&.date_start&.year || event&.date_raw.presence
   end
 
   # Resolve a relative argument into a persisted Person: an existing Person is

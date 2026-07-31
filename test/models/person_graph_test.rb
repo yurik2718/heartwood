@@ -81,6 +81,30 @@ class PersonGraphTest < ActiveSupport::TestCase
     assert_equal "Bach",             node[:surname]
   end
 
+  test "nodes carry the partnered flag that picks the card or circle shape" do
+    graph = @child.ancestor_graph(depth: 1)
+    by_id = graph[:nodes].index_by { |n| n[:id] }
+    assert by_id[@father.id][:partnered], "couple member should be partnered"
+    assert by_id[@mother.id][:partnered], "couple member should be partnered"
+    assert_not by_id[@child.id][:partnered], "single should not be partnered"
+  end
+
+  test "nodes carry a compact lifespan string" do
+    dated = Person.create!(given_names: "Dated", sex: "M", tree: @tree)
+    Event.create!(kind: "BIRT", eventable: dated, tree: @tree, date_raw: "23 MAY 1767", date_start: Date.new(1767, 5, 23))
+    Event.create!(kind: "DEAT", eventable: dated, tree: @tree, date_raw: "1837", date_start: Date.new(1837, 1, 1))
+    node = dated.send(:node_data, dated, generation: 0, order: 0)
+    assert_equal "1767 – 1837", node[:years]
+  end
+
+  test "lifespan falls back to the raw date string when the date did not parse" do
+    approx = Person.create!(given_names: "Approx", sex: "M", tree: @tree)
+    Event.create!(kind: "BIRT", eventable: approx, tree: @tree, date_raw: "ок. 1696")
+    Event.create!(kind: "DEAT", eventable: approx, tree: @tree)
+    node = approx.send(:node_data, approx, generation: 0, order: 0)
+    assert_equal "ок. 1696", node[:years]
+  end
+
   test "redacted living node carries no given or surname" do
     Current.reset
     Current.session = users(:two).sessions.create!   # outsider — living people are redacted

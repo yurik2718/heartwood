@@ -26,6 +26,17 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
     assert_select "body", /Ada Lovelace/
   end
 
+  test "panel renders the compact card inside the person-panel frame" do
+    Event.create!(kind: "BIRT", eventable: @person, tree: @tree, date_raw: "1815",
+                  date_start: Date.new(1815, 12, 10), place_name: "London")
+    get panel_person_url(@person)
+    assert_response :success
+    assert_select "turbo-frame#person-panel" do
+      assert_select ".person-panel-name", text: "Ada Lovelace"
+      assert_select ".person-panel-field dd", text: /1815 · London/
+    end
+  end
+
   test "profile defaults to details tab" do
     get person_url(@person)
     assert_select ".profile-tab--active", text: /Details/i

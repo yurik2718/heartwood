@@ -33,6 +33,7 @@ Rails.application.routes.draw do
     end
     member do
       get :map, to: "maps#person"
+      get :panel
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

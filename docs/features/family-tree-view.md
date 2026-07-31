@@ -99,8 +99,22 @@ sibling subtrees never overlap.
   that gap.
 - **Person panel.** Clicking a node loads `people#panel` into the `person-panel` turbo-frame
   inside a slide-over drawer (`drawer_controller.js`): avatar, name, lifespan, birth/death
-  details, and buttons to refocus the tree on that person, open the profile, or edit. Node
-  clicks never navigate away from the canvas.
+  details, add-relative shortcuts, and buttons to refocus the tree on that person, open the
+  profile, or edit. Node clicks never navigate away from the canvas.
+- **Ghost add-relative slots.** Dashed placeholder nodes at the growth frontier, members only
+  (`Person#collect_ghosts`, negative ids riding the normal graph pipeline): "add parent" above
+  every ancestor with no recorded parents, "add partner"/"add child" on the focus in
+  descendants mode (the clan view opts out). A ghost opens `relatives#new` in the panel; the
+  create round-trip carries `return_to` (checked with `url_from`) back to the tree.
+- **Camera & input.** Wheel zoom anchored at the cursor, one-finger pan, two-finger pinch,
+  +/−/fit/print buttons, and keyboard: arrows walk partner/sibling/generations, Enter opens
+  the panel. Live search dims non-matches on the canvas and flies to the picked person.
+- **Big-tree ergonomics.** Past ~60 people the first load folds branches beyond 3 rows from
+  the focus (`_autoCollapse`); a mini map with a viewport rectangle appears whenever the tree
+  overflows the canvas (click = jump). Camera and folded branches persist per
+  focus/mode/depth in localStorage, invalidated when the node count changes.
+- **Print.** The print button scales the layout to page width, strips all chrome via the
+  print stylesheet, and restores the camera afterwards.
 - **Viewport.** Pan/zoom live in the controller. On load the camera **fits the whole tree**
   in the canvas: zoom out (never in) until it fits, floored at `MIN_FIT` — below that a huge
   tree would shrink to confetti, so the camera falls back to centring the focus card. Wheel

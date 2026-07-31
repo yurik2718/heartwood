@@ -750,6 +750,7 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .tree-zoom button {
   width: 2.1rem;
   height: 2.1rem;
+  padding: 0;   /* the global button padding would squeeze the svg icon */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -763,6 +764,7 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 .tree-zoom button:hover { background: var(--accent-wash); border-color: var(--accent); }
+.tree-zoom button svg { width: 1.05rem; height: 1.05rem; }
 
 /* Slide-over person panel — opens over the canvas when a node is clicked
    (drawer_controller.js + people/panel.html.erb). */

@@ -29,7 +29,9 @@
     <button type="button" data-action="tree#zoomIn"  aria-label="<%= t("trees.zoom_in") %>"  title="<%= t("trees.zoom_in") %>">+</button>
     <button type="button" data-action="tree#zoomOut" aria-label="<%= t("trees.zoom_out") %>" title="<%= t("trees.zoom_out") %>">−</button>
     <button type="button" data-action="tree#zoomFit" aria-label="<%= t("trees.zoom_fit") %>" title="<%= t("trees.zoom_fit") %>">⌂</button>
-    <button type="button" class="tree-print-btn" data-action="tree#print" aria-label="<%= t("trees.print") %>" title="<%= t("trees.print") %>">⎙</button>
+    <button type="button" class="tree-print-btn" data-action="tree#print" aria-label="<%= t("trees.print") %>" title="<%= t("trees.print") %>">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="7" rx="1"/><path d="M7 14h10v6H7z"/></svg>
+    </button>
   </div>
 
   <%# Slide-over person panel: node links load people#panel into this frame; the

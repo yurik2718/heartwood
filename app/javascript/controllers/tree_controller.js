@@ -31,7 +31,7 @@ const AUTO_COLLAPSE_MIN = 60
 const AUTO_ROWS         = 3   // rows from the focus that stay expanded
 
 export default class extends Controller {
-  static targets = ["inner", "svg", "node", "searchInput", "searchResults"]
+  static targets = ["inner", "svg", "node", "searchInput", "searchResults", "minimap"]
   static values  = {
     graph:         Object,
     mode:          String,
@@ -207,6 +207,7 @@ export default class extends Controller {
     this._placeNodes()
     this._drawEdges()
     this._drawToggles()
+    this._drawMiniMap()
   }
 
   // A unit is visible if every ancestor is expanded; a collapsed unit is itself
@@ -566,7 +567,7 @@ export default class extends Controller {
 
   // One pointer drags the camera; a second pointer switches to pinch-zoom.
   _onDown(e) {
-    if (e.target.closest("a, button, .tree-search, .tree-drawer")) return   // let controls through
+    if (e.target.closest("a, button, .tree-search, .tree-drawer, .tree-minimap")) return   // let controls through
     e.preventDefault()
     this._pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (this._pointers.size === 2) {
@@ -662,5 +663,56 @@ export default class extends Controller {
     inner.style.transform =
       `translate(${this._pan.x}px, ${this._pan.y}px) scale(${this._scale})`
     this._persist()
+    this._drawMiniMap()
+  }
+
+  // --- Mini map ----------------------------------------------------------------
+
+  // A thumbnail of the whole layout with a viewport rectangle, bottom-left.
+  // Only shown while the tree overflows the canvas — when everything is on
+  // screen it would just repeat the picture.
+  _drawMiniMap() {
+    if (!this.hasMinimapTarget || !this._pos || !this._pan) return
+    const mm = this.minimapTarget
+    const vw = this.element.clientWidth,     vh = this.element.clientHeight
+    const tw = this.innerTarget.offsetWidth, th = this.innerTarget.offsetHeight
+    const fits = tw * this._scale <= vw + 1 && th * this._scale <= vh + 1
+    mm.classList.toggle("tree-minimap--hidden", fits)
+    if (fits) return
+
+    const dpr  = window.devicePixelRatio || 1
+    const cssW = mm.offsetWidth, cssH = mm.offsetHeight
+    mm.width  = cssW * dpr
+    mm.height = cssH * dpr
+    const ctx = mm.getContext("2d")
+    ctx.scale(dpr, dpr)
+    ctx.clearRect(0, 0, cssW, cssH)
+
+    const k = Math.min(cssW / tw, cssH / th)
+    this._mmScale = k
+
+    const rootStyle = getComputedStyle(document.documentElement)
+    const inkEdge   = rootStyle.getPropertyValue("--tree-edge").trim() || "#b3a695"
+    const inkAccent = rootStyle.getPropertyValue("--accent").trim()    || "#5a7d4f"
+
+    for (const [ id, p ] of Object.entries(this._pos)) {
+      const node = this._nodeById.get(+id)
+      if (node?.ghost) continue
+      ctx.fillStyle = +id === this.graphValue.focus_id ? inkAccent : inkEdge
+      ctx.fillRect(p.x * k, p.y * k, Math.max(p.w * k, 2), Math.max(p.h * k, 2))
+    }
+
+    ctx.strokeStyle = inkAccent
+    ctx.lineWidth   = 1.5
+    ctx.strokeRect(-this._pan.x / this._scale * k, -this._pan.y / this._scale * k,
+                   vw / this._scale * k, vh / this._scale * k)
+  }
+
+  // Click on the mini map → centre the camera on that spot of the tree.
+  minimapJump(e) {
+    if (!this._mmScale) return
+    const rect = this.minimapTarget.getBoundingClientRect()
+    this._panTo((e.clientX - rect.left) / this._mmScale,
+                (e.clientY - rect.top)  / this._mmScale)
   }
 }

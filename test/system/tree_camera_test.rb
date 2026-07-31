@@ -103,6 +103,28 @@ class TreeCameraTest < ApplicationSystemTestCase
       "doubling the finger distance should double the scale"
   end
 
+  test "mini map appears once the tree overflows and a click jumps the camera" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 6)
+    assert_selector ".tree-edges path", wait: 5
+    assert_no_selector ".tree-minimap"   # fitted tree → no map
+
+    3.times { find(".tree-zoom button", text: "+").click }
+    assert_selector ".tree-minimap", wait: 3
+
+    moved = page.evaluate_script(<<~JS)
+      (() => {
+        const inner  = document.querySelector(".tree-inner")
+        const before = getComputedStyle(inner).transform
+        const mm     = document.querySelector(".tree-minimap")
+        const rect   = mm.getBoundingClientRect()
+        mm.dispatchEvent(new PointerEvent("pointerdown",
+          { clientX: rect.left + 4, clientY: rect.top + 4, bubbles: true }))
+        return getComputedStyle(inner).transform !== before
+      })()
+    JS
+    assert moved, "clicking the mini map should move the camera"
+  end
+
   test "wheel zoom keeps the point under the cursor fixed" do
     visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
     assert_selector ".tree-edges path", wait: 5

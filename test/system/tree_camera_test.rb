@@ -41,6 +41,29 @@ class TreeCameraTest < ApplicationSystemTestCase
     assert fits, "the whole tree should be visible inside the canvas on load"
   end
 
+  test "a big tree loads with far branches auto-folded" do
+    # Binary descendancy, 6 generations → 63 people, over the auto-collapse bar.
+    root  = Person.create!(given_names: "Big Root", sex: "M", tree: @tree)
+    level = [ root ]
+    5.times do |g|
+      level = level.flat_map do |parent|
+        fam = Family.create!(tree: @tree)
+        fam.partners << parent
+        Array.new(2) do |i|
+          Person.create!(given_names: "G#{g}", sex: "M", tree: @tree).tap { |c| fam.children << c }
+        end
+      end
+    end
+
+    visit person_tree_path(root, mode: "descendants", depth: 6)
+    assert_selector ".tree-edges path", wait: 5
+    assert_selector ".tree-toggle--collapsed", minimum: 1
+    # Far generations are folded away, so far fewer than 63 nodes are shown.
+    shown = page.evaluate_script(
+      "document.querySelectorAll('.tree-node:not([style*=\"display: none\"])').length")
+    assert_operator shown, :<, 40, "far branches should load folded"
+  end
+
   test "zoom buttons change the scale around the canvas centre" do
     visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
     assert_selector ".tree-edges path", wait: 5

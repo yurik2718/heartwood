@@ -25,6 +25,11 @@ const ROW_GAP     = 70    // vertical gap between generation rows
 const PAD         = 60    // breathing room around the laid-out tree
 const SVG_NS      = "http://www.w3.org/2000/svg"
 
+// Above this many people the far branches load folded (see _autoCollapse):
+// a huge род opens readable around the focus instead of as confetti.
+const AUTO_COLLAPSE_MIN = 60
+const AUTO_ROWS         = 3   // rows from the focus that stay expanded
+
 export default class extends Controller {
   static targets = ["inner", "svg", "node", "searchInput", "searchResults"]
   static values  = {
@@ -48,6 +53,7 @@ export default class extends Controller {
 
     const saved = this._loadState()
     if (saved) this._restoreCollapsed(saved.collapsed)
+    else       this._autoCollapse()
     this._relayout()
     if (saved?.camera) {
       this._scale = saved.camera.scale
@@ -90,6 +96,22 @@ export default class extends Controller {
     if (!keys?.length) return
     const byKey = new Map(this._units.map(u => [ this._unitKey(u), u.id ]))
     for (const k of keys) if (byKey.has(k)) this._collapsed.add(byKey.get(k))
+  }
+
+  // First load of a big tree: keep AUTO_ROWS rows around the focus expanded and
+  // fold everything branchable beyond them behind "+N" badges. Expanding once
+  // persists, so this only shapes the very first impression.
+  _autoCollapse() {
+    const people = this.graphValue.nodes.filter(n => !n.ghost).length
+    if (people <= AUTO_COLLAPSE_MIN) return
+    const walk = (u, row) => {
+      if (row >= AUTO_ROWS && u.children.length && this._countSubtree(u)) {
+        this._collapsed.add(u.id)
+        return
+      }
+      for (const c of u.children) walk(c, row + 1)
+    }
+    walk(this._root, 0)
   }
 
   _persist() {

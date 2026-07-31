@@ -237,6 +237,12 @@ ru:
     search_placeholder: Найти человека…
     expand: Развернуть ветвь
     collapse: Свернуть ветвь
+    add_relative: Добавить
+    ghost_for: "Для: %{name}"
+    ghost:
+      parent: Добавить родителя
+      partner: Добавить партнёра
+      child: Добавить ребёнка
 
   auth:
     sign_in_title: Вход в Heartwood

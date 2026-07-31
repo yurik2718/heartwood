@@ -240,6 +240,12 @@ en:
     search_placeholder: Find a person…
     expand: Expand branch
     collapse: Collapse branch
+    add_relative: Add
+    ghost_for: "For: %{name}"
+    ghost:
+      parent: Add parent
+      partner: Add partner
+      child: Add child
 
   auth:
     sign_in_title: Sign in to Heartwood

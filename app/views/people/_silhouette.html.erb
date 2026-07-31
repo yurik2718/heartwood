@@ -1,0 +1,14 @@
+<%# locals: sex ("M" / "F" / anything else → neutral) %>
+<%# Outline person silhouette (Balkan-style) for nodes without a photo and for
+    ghost add-relative slots. Strokes inherit currentColor from the parent. %>
+<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"
+     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <% if sex == "F" %>
+    <circle cx="32" cy="24" r="9"/>
+    <path d="M21 31c-3-13 2-20 11-20s14 7 11 20"/>
+    <path d="M14 54c3-11 9-15 18-15s15 4 18 15"/>
+  <% else %>
+    <circle cx="32" cy="22" r="10"/>
+    <path d="M14 54c3-11 9-15 18-15s15 4 18 15"/>
+  <% end %>
+</svg>

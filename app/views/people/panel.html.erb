@@ -23,6 +23,17 @@
       <%= link_to t("people.edit_button"), edit_person_path(@person), class: "button button--outline" %>
     </div>
 
+    <%# Add a relative without leaving the tree: the form loads into this same
+        panel; return_to keeps the round-trip anchored to the tree page. %>
+    <div class="person-panel-add">
+      <span class="person-panel-add-label"><%= t("trees.add_relative") %>:</span>
+      <% %w[parent partner child].each do |relation| %>
+        <%= link_to t("family.relation_singular.#{relation}"),
+              new_person_relative_path(@person, relation: relation, return_to: params[:return_to]),
+              class: "linkish", data: { turbo_frame: "person-panel" } %>
+      <% end %>
+    </div>
+
     <% vitals = [ @person.birth, @person.death ].compact %>
     <% if vitals.any? %>
       <dl class="person-panel-fields">

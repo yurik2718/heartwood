@@ -1,6 +1,14 @@
-<%= turbo_frame_tag "add_#{@relation}" do %>
-  <div class="relative-picker">
+<%# Rendered in two contexts: the profile's inline "add_<relation>" frame, and the
+    tree's slide-over panel (Turbo-Frame: person-panel — a ghost node or a panel
+    button). In the panel the create forms target _top and carry return_to so a
+    successful add lands back on the tree with the new person in it. %>
+<% panel = request.headers["Turbo-Frame"] == "person-panel" %>
+<%= turbo_frame_tag(panel ? "person-panel" : "add_#{@relation}") do %>
+  <div class="relative-picker <%= "relative-picker--panel" if panel %>">
     <p class="inline-title"><%= t("family.add_title", relation: t("family.relation_singular.#{@relation}")) %></p>
+    <% if panel %>
+      <p class="muted relative-picker-for"><%= t("trees.ghost_for", name: @person.display_name) %></p>
+    <% end %>
 
     <%# 1) Find and link an existing person. Typing debounce-submits to #search,
         which renders matches into the nested "relative_candidates" frame. %>
@@ -8,6 +16,7 @@
           data: { controller: "search", turbo_frame: "relative_candidates" },
           class: "combobox" do %>
       <%= hidden_field_tag :relation, @relation %>
+      <%= hidden_field_tag :return_to, params[:return_to] %>
       <%= search_field_tag :q, nil,
             placeholder: t("family.combobox.placeholder"),
             autocomplete: "off",
@@ -18,8 +27,10 @@
     <p class="combobox-or"><span><%= t("family.combobox.or_new") %></span></p>
 
     <%# 2) Or create a brand-new person. %>
-    <%= form_with model: @relative, url: person_relatives_path(@person), class: "form form--inline" do |f| %>
+    <%= form_with model: @relative, url: person_relatives_path(@person), class: "form form--inline",
+          data: (panel ? { turbo_frame: "_top" } : {}) do |f| %>
       <%= hidden_field_tag :relation, @relation %>
+      <%= hidden_field_tag :return_to, params[:return_to] %>
       <div class="field"><%= f.label :given_names %><%= f.text_field :given_names %></div>
       <div class="field"><%= f.label :surname %><%= f.text_field :surname %></div>
       <div class="field">
@@ -28,7 +39,12 @@
       </div>
       <div class="actions">
         <%= f.submit t("people.add") %>
-        <%= link_to t("forms.cancel"), person_path(@person), class: "linkish", data: { turbo_frame: "_top" } %>
+        <% if panel %>
+          <%= link_to t("forms.cancel"), panel_person_path(@person, return_to: params[:return_to]),
+                class: "linkish", data: { turbo_frame: "person-panel" } %>
+        <% else %>
+          <%= link_to t("forms.cancel"), person_path(@person), class: "linkish", data: { turbo_frame: "_top" } %>
+        <% end %>
       </div>
     <% end %>
   </div>

@@ -113,10 +113,13 @@ export default class extends Controller {
   }
 
   // People strictly below a unit — shown on its collapsed badge ("+N").
+  // Ghost add-relative slots don't count: they aren't people.
   _countSubtree(u) {
     if (u.subtreeCount != null) return u.subtreeCount
     let n = 0
-    for (const c of u.children) n += c.members.length + this._countSubtree(c)
+    for (const c of u.children) {
+      n += c.members.filter(id => !this._nodeById.get(id).ghost).length + this._countSubtree(c)
+    }
     return u.subtreeCount = n
   }
 
@@ -315,7 +318,8 @@ export default class extends Controller {
     const dir = this.modeValue === "ancestors" ? -1 : 1
 
     for (const u of this._units) {
-      if (!u.visible || !u.children.length) continue
+      // No toggle when the only things below are ghost slots — nothing to fold.
+      if (!u.visible || !u.children.length || !this._countSubtree(u)) continue
       const collapsed = this._collapsed.has(u.id)
 
       const btn = document.createElement("button")
@@ -352,7 +356,7 @@ export default class extends Controller {
 
     const matches = q
       ? this.graphValue.nodes
-          .filter(n => !n.living && n.name && n.name.toLowerCase().includes(q))
+          .filter(n => !n.living && !n.ghost && n.name && n.name.toLowerCase().includes(q))
           .slice(0, 8)
       : []
 

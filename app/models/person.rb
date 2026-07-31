@@ -164,7 +164,7 @@ class Person < ApplicationRecord
 
   private
 
-  def traverse_graph(depth:, neighbors:, mode:)
+  def traverse_graph(depth:, neighbors:, mode:, ghosts: true)
     persons    = {}
     gens       = {}
     orders     = {}
@@ -191,12 +191,17 @@ class Person < ApplicationRecord
     # In descendants mode this also pulls in spouses who married into the line.
     unions = collect_unions(persons:, gens:, orders:, gen_counts:, mode:)
 
+    # Dashed "add a relative" slots at the tree's growth frontier. Built before
+    # the partnered set so a ghost partner renders as the couple's second card.
+    ghost_nodes = ghosts ? collect_ghosts(persons:, gens:, orders:, gen_counts:, unions:, edges:, mode:, depth:) : []
+
     # Couple members render as banded cards, everyone else as circles — the shape
     # must match the JS unit grouping, so it is derived from the same unions.
     partnered = unions.flat_map { |u| u[:partner_ids] }.to_set
     nodes = persons.values.map do |p|
       node_data(p, generation: gens[p.id], order: orders[p.id], partnered: partnered.include?(p.id))
     end
+    nodes += ghost_nodes.map { |g| g.merge(partnered: partnered.include?(g[:id])) }
     { nodes:, edges:, unions:, persons:, focus_id: id, mode: }
   end
 
@@ -231,6 +236,46 @@ class Person < ApplicationRecord
     end
 
     unions
+  end
+
+  # Dashed placeholder nodes that invite adding a missing relative, shown only to
+  # members of the tree (viewers can't add anyone). Negative ids keep them apart
+  # from real people; the node partial links them to relatives#new.
+  #
+  # Ancestors mode: an "add parent" slot above every ancestor with no known
+  # parents (the research frontier), unless the depth cut them off. Descendants
+  # mode: "add partner" / "add child" slots for the focus person only — every
+  # other node offers the same actions through its panel without the clutter.
+  def collect_ghosts(persons:, gens:, orders:, gen_counts:, unions:, edges:, mode:, depth:)
+    return [] if depth < 1   # "just me" view — keep the depth-0 contract literal
+    return [] unless Current.user && tree.users.exists?(Current.user.id)
+
+    ghosts  = []
+    next_id = 0
+    add = lambda do |kind, for_id, gen|
+      gid = (next_id -= 1)
+      ghosts << { id: gid, ghost: kind, ghost_for: for_id,
+                  generation: gen, order: gen_counts[gen] }
+      gen_counts[gen] += 1
+      gid
+    end
+
+    if mode == "ancestors"
+      persons.each_value do |p|
+        next if gens[p.id] >= depth || p.parents.exists?
+        gid = add.call("parent", p.id, gens[p.id] + 1)
+        edges << { from_id: p.id, to_id: gid }
+      end
+    else
+      unless unions.any? { |u| u[:partner_ids].include?(id) }
+        gid = add.call("partner", id, gens[id])
+        unions << { partner_ids: [ id, gid ], child_ids: [] }
+      end
+      gid = add.call("child", id, gens[id] + 1)
+      edges << { from_id: id, to_id: gid }
+    end
+
+    ghosts
   end
 
   # The family that anchors a person's couple block: their parents (ancestors mode)
@@ -330,12 +375,12 @@ class Person < ApplicationRecord
 
   # --- Graph traversal for the tree view (see docs/features/family-tree-view.md) ---
 
-  def ancestor_graph(depth: 4)
-    traverse_graph(depth:, neighbors: :parents, mode: "ancestors")
+  def ancestor_graph(depth: 4, ghosts: true)
+    traverse_graph(depth:, neighbors: :parents, mode: "ancestors", ghosts:)
   end
 
-  def descendant_graph(depth: 4)
-    traverse_graph(depth:, neighbors: :children, mode: "descendants")
+  def descendant_graph(depth: 4, ghosts: true)
+    traverse_graph(depth:, neighbors: :children, mode: "descendants", ghosts:)
   end
 
   # Full display name composed from its parts (nickname is intentionally excluded).

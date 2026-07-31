@@ -25,6 +25,22 @@ class RelativesControllerTest < ActionDispatch::IntegrationTest
     assert_includes @person.parents.map(&:given_names), "Mary"
   end
 
+  test "create with return_to lands back on that page (tree panel flow)" do
+    post person_relatives_url(@person), params: {
+      relation: "parent", return_to: person_tree_path(@person),
+      person: { given_names: "Mary", sex: "F" }
+    }
+    assert_redirected_to person_tree_path(@person)
+  end
+
+  test "create ignores a foreign-host return_to" do
+    post person_relatives_url(@person), params: {
+      relation: "parent", return_to: "https://evil.example/phish",
+      person: { given_names: "Mary", sex: "F" }
+    }
+    assert_redirected_to person_url(@person)
+  end
+
   test "adds a child" do
     post person_relatives_url(@person), params: {
       relation: "child", person: { given_names: "Kim", sex: "U" }

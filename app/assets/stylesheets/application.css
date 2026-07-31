@@ -513,6 +513,29 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   box-shadow: 0 0 0 3px var(--accent-wash);
 }
 
+/* Ghost add-relative slots — dashed invitations at the tree's growth frontier. */
+.tree-node--ghost {
+  border-style: dashed;
+  border-color: var(--tree-edge);
+  background: transparent;
+  box-shadow: none;
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    padding: 0 0.75rem;
+
+    &:hover { background: transparent; color: var(--accent-ink); }
+  }
+}
+.tree-node--ghost.tree-node--circle a { flex-direction: column; gap: 0.35rem; }
+.tree-node--ghost:hover { border-color: var(--accent); }
+.ghost-icon svg { display: block; width: 2.4rem; height: 2.4rem; }
+.ghost-label { font-size: 0.78rem; font-weight: 600; text-align: center; }
+
 .node-name--living {
   display: flex;
   align-items: center;
@@ -739,6 +762,21 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   padding: 1rem;
   border-bottom: 1px solid var(--line);
 }
+
+.person-panel-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.person-panel-add-label { color: var(--muted); }
+
+/* The add-relative picker rendered inside the tree drawer. */
+.tree-drawer .relative-picker { padding: 1rem; }
+.relative-picker-for { margin: -0.25rem 0 0.75rem; font-size: 0.85rem; }
 
 .person-panel-fields { margin: 0; padding: 1rem; display: grid; gap: 0.9rem; }
 .person-panel-field dt {

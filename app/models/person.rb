@@ -17,6 +17,9 @@ class Person < ApplicationRecord
 
   validates :sex, inclusion: { in: SEXES }
   validate :avatar_is_an_image, if: -> { avatar.attached? }
+  # The plan cap guards every path that creates people — forms, add-relative,
+  # ghost slots, GEDCOM import — because they all go through Person.create.
+  validate :tree_has_capacity, on: :create
 
   AVATAR_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
   AVATAR_MAX_BYTES     = 5.megabytes
@@ -334,6 +337,11 @@ class Person < ApplicationRecord
   def avatar_url_for(person)
     return unless person.avatar.attached?
     Rails.application.routes.url_helpers.rails_blob_path(person.avatar, only_path: true)
+  end
+
+  def tree_has_capacity
+    return unless tree&.at_people_limit?
+    errors.add(:base, :tree_full, limit: tree.people_limit)
   end
 
   def avatar_is_an_image

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_31_232844) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -192,6 +192,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
   create_table "trees", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
+    t.string "plan", default: "free", null: false
+    t.datetime "plan_expires_at"
     t.datetime "updated_at", null: false
   end
 

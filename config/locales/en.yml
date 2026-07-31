@@ -334,6 +334,8 @@ en:
       models:
         person:
           attributes:
+            base:
+              tree_full: "The free plan holds up to %{limit} people per tree. Upgrade to Family to add without limits."
             avatar:
               invalid_content_type: must be a JPEG, PNG, or WebP image
               too_large: must be smaller than 5 MB

@@ -396,6 +396,8 @@ ru:
       models:
         person:
           attributes:
+            base:
+              tree_full: "В бесплатном тарифе — до %{limit} человек в дереве. Перейдите на «Семейный», чтобы добавлять без ограничений."
             avatar:
               invalid_content_type: должно быть изображением JPEG, PNG или WebP
               too_large: не должно превышать 5 МБ

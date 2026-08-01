@@ -32,6 +32,9 @@ of who does what well. Ties into [[features-index]].
 ## Rails / Hotwire / SaaS patterns (architecture, not domain)
 - **Writebook** (37signals) — **Take:** the *taste* of a canonical small Rails 8 app
   (controllers, current-user auth, CSS organization). Our baseline style — at `~/dhh-references/writebook`.
+- **once-campfire** (37signals) — **Take:** another canonical small Rails 8 app — real-time
+  Hotwire/Turbo Streams patterns, ActionCable usage, self-hosted single-tenant structure. At
+  `~/dhh-references/once-campfire`.
 - **Maybe** (`maybe-finance`, MIT) — **Take:** modern, complex Rails+Hotwire patterns. ⚠️ Uses
   Tailwind + Postgres — ignore those; we stay vanilla ([[stack]]).
 - **Solidus / Spree** — **Take:** open-core **Rails Engine** modularity for our [[open-core]]

@@ -33,6 +33,11 @@ trees rather than one account per install).
 - **Per-record visibility** tied into [[privacy-access]] (public / members-only / private on
   individual people/events) — today a viewer sees everything the tree contains, just can't edit
   it. Coarser than the eventual model, intentionally simple for v1.
+- **Read-only share links** ([[privacy-access]] "Share links") — a *different* mechanism from
+  the `join_code` invite links above: no account, no `TreeMembership` row, just a token that
+  opens one person/branch as a view. `join_code` always grants an editing membership today;
+  it should not be repurposed for "just let them look." Worth its own token/model rather than
+  overloading `Tree#join_code`.
 - Change history / "who edited what" audit trail.
 
 ## Notes

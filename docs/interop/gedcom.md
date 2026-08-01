@@ -27,6 +27,37 @@ Our [[domain-model]] is deliberately GEDCOM-shaped so mapping is near-lossless.
 **Decision:** export **7.0** (with GEDZIP for media), import **both 5.5.1 and 7.0** tolerantly.
 See [[adr/0004-gedcom-interop]].
 
+## The Gramps round-trip — a named flagship workflow, not just "another GEDCOM vendor"
+
+This is the concrete story behind [[positioning]]'s "webtrees-grade openness": **Gramps is
+the reference desktop-open-source genealogy tool, and Heartwood + Gramps together should feel
+like one workflow, not two disconnected apps that happen to share a file format.**
+
+```
+Family collaborates in Heartwood (cloud, multiple relatives, live editing — [[collaboration]])
+        │  Export → GEDCOM 7.0 / GEDZIP
+        ▼
+Open in Gramps (free, local, offline, deep power-user tools: reports, DNA tools, custom filters)
+        │  Edit further, verify sources, run Gramps-only analysis
+        ▼
+Re-import into Heartwood → merges/updates back into the shared cloud tree
+```
+
+Gramps' own native format is Gramps XML — GEDCOM is the correct interop layer regardless (it's
+what Gramps itself imports/exports for anything not staying purely inside Gramps), so no
+Gramps-specific parser is needed on our side. What *is* Gramps-specific and worth doing
+deliberately:
+- **Test the round-trip against real Gramps output**, not just our own GEDCOM — Gramps has its
+  own dialect quirks (tag choices, custom event types) worth a dedicated fixture in the GEDCOM
+  parser test suite.
+- **Name it in the product**, not just support it silently: the export screen/docs should say
+  *"Works great with Gramps"* explicitly — most users won't discover the workflow otherwise.
+- **Win on convenience where Gramps is weak**: multi-person live cloud collaboration (Gramps
+  Web exists but is a separate, heavier project) is the thing Gramps desktop fundamentally
+  cannot do alone — that's Heartwood's half of the pairing. See [[positioning]] "Not
+  feature-parity with Gramps" — we don't chase Gramps' desktop power-features (deep
+  report/DNA/plugin tooling); we hand off to Gramps for those instead of rebuilding them.
+
 ## Hard truths (be honest about these)
 - GEDCOM interop is **never perfectly lossless in practice** — vendors add custom tags
   (`_CUSTOM`), encodings vary (ANSEL in old files!), and structure differs. Our rule:

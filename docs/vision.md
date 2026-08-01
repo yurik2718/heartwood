@@ -26,6 +26,9 @@ and keep alive for decades. See [[stack]] and [[adr/0001-vanilla-rails-stack]].
    Longevity beats novelty. A self-hosted instance should still run in 10 years.
 3. **For real people.** Intuitive enough for a grandparent to add a cousin; powerful enough
    for a serious genealogist (sources, evidence, GEDCOM). See [[features-index]].
+   Localized from day one (English + Russian shipped; the i18n plumbing is generic, not
+   hardcoded to two) — "for real people" means real people who don't read English, too. A
+   precondition for the open-source-popularity goal in [[positioning]].
 4. **Honest about evidence.** Genealogy is about *claims backed by sources*, not just a tree
    of names. We model [[source-citation]] as a first-class citizen, like [[prior-art|Gramps]].
 5. **One codebase, two deployments.** The same open core powers both self-host and our

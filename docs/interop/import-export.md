@@ -52,6 +52,11 @@ record instead of restarting. Emit progress via **`Rails.event`** + Turbo Stream
 - Generated in a Solid Queue job for large trees, delivered via Active Storage download link.
 - **Self-host bonus:** the whole SQLite DB *is* a backup — but GEDCOM export is the portable,
   vendor-neutral one users can take anywhere.
+- **The flagship round-trip: cloud collaboration in Heartwood ↔ deep local editing in Gramps.**
+  Several relatives fill in the tree together in Heartwood, export to GEDCOM, do
+  power-user work in Gramps (reports, DNA tools, custom filters), then re-import — see
+  [[gedcom]] "The Gramps round-trip" for why this is named and tested deliberately, not just
+  an incidental side effect of generic GEDCOM support.
 
 ## Future formats (Could)
 - CSV import for simple lists. GEDCOM X / FamilySearch API sync. See [[gedcom]] version table.

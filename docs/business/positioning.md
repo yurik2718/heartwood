@@ -51,6 +51,10 @@ That need is served by the record-data SaaS's data, not by software — and we s
    See [[open-core]], [[pricing-hosting]].
 4. **Privacy-first from the schema up.** Living people hidden by default, granular
    controls — a standout that OSS users prize and closed SaaS do grudgingly.
+5. **Global by construction, not afterthought.** Shipping bilingual (English + Russian) from
+   the first release, on generic Rails I18n rather than one hardcoded locale, is what makes
+   "popular open-source family-tree app worldwide" ([[vision]]) a realistic goal instead of
+   a slogan. Every user-facing string goes through `t()` — see `config/locales/`.
 
 ## UX is the product — the intuitiveness commitment
 

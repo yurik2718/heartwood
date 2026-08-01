@@ -45,7 +45,7 @@
         <% if authenticated? %>
           <%= turbo_stream_from Current.tree, :hints %>
           <%= render "hints/badge", count: Current.tree.duplicate_hints.pending.count %>
-          <%= button_to t("nav.sign_out"), session_path, method: :delete, class: "linkish" %>
+          <%= button_to t("nav.sign_out"), session_path, method: :delete, class: "btn btn--plain" %>
         <% end %>
       </div>
     </header>

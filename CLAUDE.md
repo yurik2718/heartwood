@@ -35,13 +35,33 @@ bin/rails test test/models/person_test.rb:42 # one test by line
 ## What this project is
 
 Heartwood is an **open-source, self-hostable genealogy / family-tree platform** with an
-optional **paid hosted plan**. Open core licensed AGPL-3.0; the goal is a *reference-quality*
-("эталонное") canonical Rails 8 application. See [[vision]].
+optional **paid hosted plan** — built to be *the cloud, collaborative counterpart to Gramps*:
+the same evidence-first domain depth, but a family editing one tree together from a browser
+instead of one person's local file. Open core licensed AGPL-3.0; the goal is a
+*reference-quality* ("эталонное") canonical Rails 8 application. See [[vision]],
+[[positioning]].
+
+## Build it as if DHH and 37signals made it — not "inspired by," based on the actual source
+
+For Rails/Hotwire/CSS architecture (not genealogy domain logic — see [[prior-art]] for that
+split), don't improvise a Rails style from general knowledge. Three reference apps are cloned
+at `~/dhh-references/`; **read their actual source and base the code and architectural
+decisions on it**:
+
+- **once-campfire** and **Writebook** (both MIT) — the primary references. Controllers,
+  models, views, CSS: read the real files, not just the rendered UI, before building the
+  Heartwood equivalent. Our `.btn`/`.input`/`.avatar`/icon primitives, the OKLCH color
+  tokens, the member-row + invite-link shape — all adapted directly from these two.
+- **fizzy** — style/technique reference only (e.g. the mask-image icon approach). Its license
+  has a SaaS non-compete clause, so no literal fizzy assets or code ship in this repo — MIT
+  icons come from campfire instead (see `app/assets/images/NOTICE.md`).
+
+Full detail and the "what to take from what" map: [[prior-art]].
 
 ## Key strategic features & tasks — keep these front of mind
 
-These three are the product's actual differentiation, not just items on a backlog — every
-feature decision should be checked against them (per [[positioning]]'s own filter).
+These are the product's actual differentiation, not just items on a backlog — every feature
+decision should be checked against them (per [[positioning]]'s own filter).
 
 ### 1. Bilingual from day one — a precondition, not a nicety
 Shipping English + Russian now, on generic Rails I18n (`t()`, `config/locales/*.yml`), because
@@ -67,13 +87,14 @@ them in a canonical Rails 8 app that is more convenient and intuitive than Gramp
 (reports, DNA, plugins). We hand off to real Gramps for that instead of rebuilding it badly.
 Full detail: [[gedcom]] "The Gramps round-trip", [[import-export]], [[positioning]].
 
-### 3. Multi-person collaboration on one tree, two distinct mechanisms
-- **Edit invites** (shipped — see [[collaboration]]): a per-tree `join_code` link;
-  whoever joins through it gets an editor/viewer role and a real account.
-- **Read-only share links** (not yet built — see [[privacy-access]] "Share links"): a
-  *different* mechanism — no account, no membership, just a token that opens one person or
-  branch as a view, for the relative who just wants to look. Don't conflate the two or
-  overload `Tree#join_code` for this; it needs its own model.
+### 3. The owner drives two distinct kinds of link — don't conflate them
+- **Edit invites** (shipped — see [[collaboration]]): the tree owner shares a `join_code`
+  link; whoever joins through it gets a real account and an editor/viewer role, and can help
+  fill in the tree.
+- **View-only share links** (not yet built — see [[privacy-access]] "Share links"): the owner
+  generates a separate link to let someone just *look at* the tree (or one branch/person) —
+  no account, no `TreeMembership` row, nothing to sign up for. This is its own token/model,
+  not a repurposed `Tree#join_code` — a view link must never grant edit access.
 
 ## Hard stack constraints (do not violate)
 

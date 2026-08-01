@@ -1,15 +1,20 @@
 /*
  * Design tokens, canonical-Rails-house-style shape: named OKLCH swatches → abstracted
- * --color-* roles, redefined in one place for dark mode. See docs/references/prior-art.md
- * for the once-campfire/writebook/fizzy source of this pattern.
+ * --color-* roles. See docs/references/prior-art.md for the once-campfire/writebook/
+ * fizzy source of this pattern.
  *
  * Heartwood keeps ONE brand hue — the sage green — as its link/selected/focus color;
- * everything else (bg, text, borders) is true black/white/gray, canonical-style.
+ * everything else (bg, text, borders) is black/white/gray, canonical-style — but warmed
+ * a few points off pure neutral (same hue family as --ink/--bg below) so the primitives
+ * don't read as stark against the rest of the app. No dark-mode block: only .btn/.input/
+ * icons would respond to it while the (still-legacy) page chrome stayed light, which is
+ * a worse, half-inverted look than no dark mode at all — revisit once the whole app
+ * shares one token system.
  */
 :root {
   /* Named color values */
-  --lch-black: 0% 0 0;
-  --lch-white: 100% 0 0;
+  --lch-black: 16% 0.018 55;   /* warm near-black, not pure #000 */
+  --lch-white: 97.98% 0.005 78.3;   /* warm off-white, matches --bg's hue */
   --lch-gray: 96% 0.005 96;
   --lch-gray-dark: 92% 0.005 96;
   --lch-gray-darker: 75% 0.005 96;
@@ -35,20 +40,6 @@
   --color-negative-light: oklch(var(--lch-red-light));
   --color-positive: oklch(var(--lch-green));
   --color-alert: oklch(var(--lch-orange));
-
-  @media (prefers-color-scheme: dark) {
-    --lch-black: 100% 0 0;
-    --lch-white: 0% 0 0;
-    --lch-gray: 25.2% 0 0;
-    --lch-gray-dark: 30.12% 0 0;
-    --lch-gray-darker: 44.95% 0 0;
-    --lch-green: 70% 0.1 138;
-    --lch-green-dark: 78% 0.09 138;
-    --lch-green-light: 28% 0.03 138;
-    --lch-red: 73.8% 0.184 29.18;
-    --lch-red-light: 28% 0.03 29.18;
-    --lch-orange: 75% 0.18 44;
-  }
 
   /*
    * Legacy aliases for screens not yet migrated to the token system above (tree

@@ -7,6 +7,7 @@
           data: { controller: "search", turbo_frame: "relationship_candidates" },
           class: "combobox" do %>
       <%= search_field_tag :q, nil,
+            class: "input",
             placeholder: t("relationships.search_placeholder"),
             autocomplete: "off",
             data: { search_target: "input", action: "input->search#debounce" } %>

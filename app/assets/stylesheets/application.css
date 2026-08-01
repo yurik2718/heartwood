@@ -171,7 +171,10 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .relative-picker .inline-title { margin: 0 0 0.5rem; font-weight: 600; text-transform: capitalize; }
 .relative-picker .form--inline { margin-top: 0; padding: 0; border: none; background: none; }
 
-.combobox input[type="search"] {
+/* :not(:where(.input)) so the relationship calculator's search field (migrated
+   to the canonical .input) isn't double-styled — relatives/new.html.erb's
+   combobox (shared with the protected tree-drawer) still uses this rule as-is. */
+.combobox input[type="search"]:not(:where(.input)) {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--line);

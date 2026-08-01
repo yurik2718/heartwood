@@ -9,7 +9,7 @@
       <span class="sourced-badge" title="<%= t("citations.sourced_title") %>"><%= t("citations.sourced_badge") %></span>
     <% end %>
     <span class="event-actions">
-      <%= link_to t("events.edit"), edit_person_event_path(person, event), class: "linkish" %>
+      <%= link_to t("events.edit"), edit_person_event_path(person, event), class: "btn btn--plain" %>
       <%= render "shared/delete_button", url: person_event_path(person, event),
             label: t("events.remove"), confirm: t("events.remove_confirm") %>
     </span>

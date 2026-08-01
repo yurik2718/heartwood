@@ -38,6 +38,29 @@ class Person < ApplicationRecord
     end
   }
 
+  # Keys for the people#index sort control (see Person.sorted below); order here is
+  # display order in the <select>. Whitelisted in the controller before use.
+  SORT_OPTIONS = %w[surname_asc surname_desc birth_asc birth_desc created_desc].freeze
+
+  # Sort the list by name, birth date, or when they were added to the tree. Birth-date
+  # sorts join each person's BIRT event (there's at most one); people without a recorded
+  # birth date sort to the end regardless of direction.
+  scope :sorted, ->(key) {
+    case key.to_s
+    when "surname_desc"
+      reorder(surname: :desc, given_names: :desc)
+    when "birth_asc", "birth_desc"
+      direction = key.to_s == "birth_asc" ? "ASC" : "DESC"
+      joins("LEFT JOIN events birth_evt ON birth_evt.eventable_id = people.id " \
+            "AND birth_evt.eventable_type = 'Person' AND birth_evt.kind = 'BIRT'")
+        .reorder(Arel.sql("birth_evt.date_start IS NULL, birth_evt.date_start #{direction}"))
+    when "created_desc"
+      reorder(created_at: :desc)
+    else
+      reorder(surname: :asc, given_names: :asc)
+    end
+  }
+
   # Members of the person's tree see all; others see only verifiably non-living, non-private people.
   scope :visible_to, ->(user) {
     known_dead    = Event.where(eventable_type: "Person", kind: DEATH_KINDS).select(:eventable_id)

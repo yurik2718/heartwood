@@ -48,6 +48,12 @@ en:
     search_clear: Clear
     sex_filter_all: All sexes
     sex_label: Sex
+    sort:
+      surname_asc: Name (A–Z)
+      surname_desc: Name (Z–A)
+      birth_asc: Birth date (oldest first)
+      birth_desc: Birth date (newest first)
+      created_desc: Recently added
     status_label: Status
     nickname_label: Nickname
     status:

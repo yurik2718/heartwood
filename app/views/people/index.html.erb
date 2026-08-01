@@ -23,7 +23,12 @@
           { include_blank: t("people.sex_filter_all"), selected: @sex },
           class: "search-filter",
           data: { action: "change->search#submit" } %>
-    <% if @q.present? || @sex.present? %>
+    <%= f.select :sort,
+          Person::SORT_OPTIONS.map { |key| [t("people.sort.#{key}"), key] },
+          { selected: @sort },
+          class: "search-filter",
+          data: { action: "change->search#submit" } %>
+    <% if @q.present? || @sex.present? || @sort != Person::SORT_OPTIONS.first %>
       <%= link_to t("people.search_clear"), people_path, class: "btn btn--plain search-clear" %>
     <% end %>
   </div>

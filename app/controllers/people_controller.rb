@@ -8,10 +8,11 @@ class PeopleController < ApplicationController
   def index
     @q      = params[:q].to_s.strip
     @sex    = params[:sex].to_s
+    @sort   = Person::SORT_OPTIONS.include?(params[:sort]) ? params[:sort] : Person::SORT_OPTIONS.first
     @people = Current.tree.people
                      .search(@q, user: Current.user)
                      .then { |r| Person::SEXES.include?(@sex) ? r.where(sex: @sex) : r }
-                     .order(:surname, :given_names)
+                     .sorted(@sort)
   end
 
   def show

@@ -48,6 +48,12 @@ ru:
     search_clear: Сбросить
     sex_filter_all: Все
     sex_label: Пол
+    sort:
+      surname_asc: Имя (А–Я)
+      surname_desc: Имя (Я–А)
+      birth_asc: Дата рождения (сначала старые)
+      birth_desc: Дата рождения (сначала новые)
+      created_desc: Недавно добавленные
     status_label: Статус
     nickname_label: Прозвище
     status:

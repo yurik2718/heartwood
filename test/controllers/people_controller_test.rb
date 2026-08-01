@@ -79,6 +79,19 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
     assert_select "body", /Lovelace/
   end
 
+  test "index defaults to surname_asc when sort is absent or unknown" do
+    get people_url
+    assert_select "select#sort option[selected][value=surname_asc]"
+
+    get people_url(sort: "not-a-real-option")
+    assert_select "select#sort option[selected][value=surname_asc]"
+  end
+
+  test "index honors a whitelisted sort param" do
+    get people_url(sort: "created_desc")
+    assert_select "select#sort option[selected][value=created_desc]"
+  end
+
   test "index renders search form" do
     get people_url
     assert_select "form[data-controller='search']"

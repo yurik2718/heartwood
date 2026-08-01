@@ -150,4 +150,32 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to people_url
   end
+
+  test "a viewer cannot create, edit, or destroy a person" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "Person.count" do
+      post people_url, params: { person: { given_names: "New", surname: "Guy", sex: "U" } }
+    end
+    assert_redirected_to root_url
+
+    patch person_url(@person), params: { person: { nickname: "Sneaky" } }
+    assert_redirected_to root_url
+    assert_nil @person.reload.nickname
+
+    assert_no_difference "Person.count" do
+      delete person_url(@person)
+    end
+    assert_redirected_to root_url
+
+    # reads still work
+    get people_url
+    assert_response :success
+    get person_url(@person)
+    assert_response :success
+  end
 end

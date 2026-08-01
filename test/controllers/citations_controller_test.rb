@@ -59,4 +59,24 @@ class CitationsControllerTest < ActionDispatch::IntegrationTest
          params: { source: { title: "Stolen record" } }
     assert_response :not_found
   end
+
+  test "a viewer cannot add or remove citations" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "Citation.count" do
+      post person_event_citations_url(@person, @event), params: { source: { title: "Parish register" } }
+    end
+    assert_redirected_to root_url
+
+    source   = Source.create!(title: "Vital record", tree: @tree)
+    citation = Citation.create!(source: source, citable: @event)
+    assert_no_difference "Citation.count" do
+      delete person_event_citation_url(@person, @event, citation)
+    end
+    assert_redirected_to root_url
+  end
 end

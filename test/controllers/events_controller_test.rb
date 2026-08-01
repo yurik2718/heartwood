@@ -59,4 +59,26 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "turbo-stream[action=replace][target=events]"
   end
+
+  test "a viewer cannot add, edit, or remove events" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "@person.events.count" do
+      post person_events_url(@person), params: { event: { kind: "BIRT", date_raw: "1815" } }
+    end
+    assert_redirected_to root_url
+
+    event = @person.events.create!(kind: "BIRT", date_raw: "1815")
+    patch person_event_url(@person, event), params: { event: { date_raw: "1900" } }
+    assert_redirected_to root_url
+    assert_equal "1815", event.reload.date_raw
+
+    assert_no_difference "Event.count" do
+      delete person_event_url(@person, event)
+    end
+  end
 end

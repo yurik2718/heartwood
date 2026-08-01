@@ -56,4 +56,19 @@ class HintsControllerTest < ActionDispatch::IntegrationTest
     patch dismiss_hint_url(other)
     assert_response :not_found
   end
+
+  test "a viewer cannot dismiss a hint or trigger a scan" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    patch dismiss_hint_url(@hint)
+    assert_redirected_to root_url
+    assert_equal "pending", @hint.reload.status
+
+    post scan_hints_url
+    assert_redirected_to root_url
+  end
 end

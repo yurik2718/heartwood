@@ -23,4 +23,25 @@ class TreeMembershipTest < ActiveSupport::TestCase
     m = TreeMembership.new(tree: trees(:alpha), user: users(:two), role: "owner")
     assert m.valid?
   end
+
+  # --- roles (owner / editor / viewer) — see [[collaboration]] ---
+
+  test "rejects a role outside owner/editor/viewer" do
+    m = TreeMembership.new(tree: trees(:beta), user: users(:one), role: "admin")
+    assert_not m.valid?
+    assert m.errors[:role].any?
+  end
+
+  test "owner?/editor?/viewer? reflect the role" do
+    owner = tree_memberships(:one_alpha)
+    assert owner.owner?
+    assert_not owner.editor?
+    assert_not owner.viewer?
+  end
+
+  test "can_edit? is true for owner and editor, false for viewer" do
+    assert TreeMembership.new(role: "owner").can_edit?
+    assert TreeMembership.new(role: "editor").can_edit?
+    assert_not TreeMembership.new(role: "viewer").can_edit?
+  end
 end

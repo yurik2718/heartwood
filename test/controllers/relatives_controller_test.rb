@@ -132,4 +132,17 @@ class RelativesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#relative_candidates button", count: 0
   end
+
+  test "a viewer cannot add a relative" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "Person.count" do
+      post person_relatives_url(@person), params: { relation: "parent", person: { given_names: "Mary" } }
+    end
+    assert_redirected_to root_url
+  end
 end

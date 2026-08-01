@@ -19,3 +19,7 @@
 .icon--person { --svg: url("person.svg"); }
 .icon--email { --svg: url("email.svg"); }
 .icon--password { --svg: url("password.svg"); }
+.icon--crown { --svg: url("crown.svg"); }
+.icon--minus { --svg: url("minus.svg"); }
+.icon--copy-paste { --svg: url("copy-paste.svg"); }
+.icon--refresh { --svg: url("refresh.svg"); }

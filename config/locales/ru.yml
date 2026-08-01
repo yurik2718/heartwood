@@ -17,6 +17,21 @@ ru:
       already_member: "Вы уже участник «%{tree}»."
       joined: "Добро пожаловать в «%{tree}»!"
 
+  tree_memberships:
+    title: Участники
+    copy_link: Скопировать ссылку
+    reset_link: Создать новую ссылку
+    reset_confirm: Старая пригласительная ссылка перестанет работать. Продолжить?
+    role_toggle_title: Переключить редактор/читатель
+    remove: Удалить
+    remove_confirm: "Удалить %{name} из этого дерева?"
+    roles:
+      owner: Владелец
+      editor: Редактор
+      viewer: Читатель
+    flash:
+      code_reset: Ссылка обновлена. Старая ссылка больше не работает.
+
   locale:
     en: EN
     ru: RU
@@ -311,6 +326,8 @@ ru:
     password_instructions: "Инструкции отправлены (если пользователь с таким email существует)."
     passwords_mismatch: Пароли не совпадают.
     invalid_token: Ссылка для сброса пароля недействительна или устарела.
+    read_only: У вас доступ только для чтения в этом дереве.
+    owners_only: Это может сделать только владелец дерева.
 
   mailer:
     password_reset:

@@ -95,6 +95,16 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   h1 { margin: 0; font-size: 1.6rem; }
 }
 
+/* Invite box on the members page — join-link field + copy/regenerate. */
+.invite-box {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  .input--actor { flex: 1; }
+}
+
 .flash {
   max-width: var(--maxw);
   margin: 1rem auto 0;

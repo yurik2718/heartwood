@@ -1,5 +1,6 @@
 class CitationsController < ApplicationController
   before_action :set_person_and_event
+  before_action :require_can_edit, only: %i[new create destroy]
 
   def new
     @citation = Citation.new

@@ -12,6 +12,7 @@ class RelativesController < ApplicationController
 
   before_action :set_person
   before_action :set_relation
+  before_action :require_can_edit, only: %i[new create]
 
   def new
     @relative = Person.new

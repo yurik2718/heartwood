@@ -4,6 +4,7 @@ class PeopleController < ApplicationController
   TABS = %w[details sources memories timeline map].freeze
 
   before_action :set_person, only: %i[show panel edit update destroy]
+  before_action :require_can_edit, only: %i[new create edit update destroy]
 
   def index
     @q      = params[:q].to_s.strip

@@ -9,11 +9,13 @@
     <p class="muted"><%= t("events.none") %></p>
   <% end %>
 
-  <%= turbo_frame_tag "add_event" do %>
-    <div class="event-add-actions">
-      <%= link_to t("events.add"), new_person_event_path(person), class: "btn btn--plain add-relative" %>
-      <%= link_to t("events.add_birthplace"), new_person_event_path(person, kind: "BIRT"), class: "btn btn--plain" %>
-      <%= link_to t("events.add_residence"), new_person_event_path(person, kind: "RESI"), class: "btn btn--plain" %>
-    </div>
+  <% if can_edit? %>
+    <%= turbo_frame_tag "add_event" do %>
+      <div class="event-add-actions">
+        <%= link_to t("events.add"), new_person_event_path(person), class: "btn btn--plain add-relative" %>
+        <%= link_to t("events.add_birthplace"), new_person_event_path(person, kind: "BIRT"), class: "btn btn--plain" %>
+        <%= link_to t("events.add_residence"), new_person_event_path(person, kind: "RESI"), class: "btn btn--plain" %>
+      </div>
+    <% end %>
   <% end %>
 </section>

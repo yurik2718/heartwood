@@ -10,8 +10,10 @@
     <p class="muted"><%= t("family.none") %></p>
   <% end %>
 
-  <%= turbo_frame_tag "add_#{relation}" do %>
-    <%= link_to t("family.add", relation: t("family.relation_singular.#{relation}")),
-          new_person_relative_path(person, relation: relation), class: "btn btn--plain add-relative" %>
+  <% if can_edit? %>
+    <%= turbo_frame_tag "add_#{relation}" do %>
+      <%= link_to t("family.add", relation: t("family.relation_singular.#{relation}")),
+            new_person_relative_path(person, relation: relation), class: "btn btn--plain add-relative" %>
+    <% end %>
   <% end %>
 </div>

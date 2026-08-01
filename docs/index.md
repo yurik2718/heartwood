@@ -10,7 +10,7 @@ status: stable
 
 This is the **Map of Content (MOC)** for the Heartwood vault. It is written to be read by
 **both humans and AI agents** (single source of truth, Markdown, interlinked). If you are an
-agent, also read [`AGENTS.md`](../AGENTS.md) at the repo root.
+agent, also read [`CLAUDE.md`](../CLAUDE.md) at the repo root.
 
 ## Start here
 

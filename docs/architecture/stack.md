@@ -8,7 +8,7 @@ status: stable
 
 The canonical **vanilla Rails 8.1** stack — chosen on purpose. The constraints *are* the
 product thesis (see [[vision]], [[adr/0001-vanilla-rails-stack]]). Agents must respect the
-hard rules in [`AGENTS.md`](../../AGENTS.md).
+hard rules in [`CLAUDE.md`](../../CLAUDE.md).
 
 ## The stack
 | Layer | Choice | Why |

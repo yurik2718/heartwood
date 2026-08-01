@@ -42,7 +42,7 @@ Part of the [[stack]] thesis. If a capability has no use here, that's fine — b
 - **PWA stubs** (Rails 8 default) — an installable web app *before* native ([[hotwire-native]]).
 - **Kamal 2 + Thruster** — one-command deploy for self-host & hosted.
 - **Local CI `bin/ci` (8.1)** — run tests/brakeman/rubocop locally; fits our TDD culture
-  (see [`AGENTS.md`](../../AGENTS.md)).
+  (see [`CLAUDE.md`](../../CLAUDE.md)).
 - **Propshaft + importmap** — no Node, no build step.
 
 ## Honest note

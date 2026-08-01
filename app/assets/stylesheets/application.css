@@ -883,7 +883,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .event-place { color: var(--muted); font-size: 0.85rem; }
 .place-input-row { display: flex; gap: 0.5rem; align-items: stretch; }
 .place-input-row input[type="text"] { flex: 1; }
-.button--small { padding: 0.3rem 0.7rem; font-size: 0.85rem; white-space: nowrap; }
 .event-add-actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
 .place-candidates { display: grid; gap: 0.25rem; margin: 0.5rem 0 0; }
 .place-candidate {

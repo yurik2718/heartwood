@@ -7,6 +7,16 @@ ru:
   active_tree:
     flash:
       not_a_member: Вы не участник этого дерева.
+
+  joins:
+    title: "Присоединиться к «%{tree}»"
+    heading: "Вас пригласили в «%{tree}»"
+    lede: Присоединяйтесь, чтобы вместе просматривать и дополнять древо.
+    submit: Присоединиться
+    flash:
+      already_member: "Вы уже участник «%{tree}»."
+      joined: "Добро пожаловать в «%{tree}»!"
+
   locale:
     en: EN
     ru: RU

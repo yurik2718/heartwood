@@ -7,6 +7,16 @@ en:
   active_tree:
     flash:
       not_a_member: You're not a member of that tree.
+
+  joins:
+    title: "Join %{tree}"
+    heading: "You've been invited to %{tree}"
+    lede: Join to view and add family members together.
+    submit: Join this tree
+    flash:
+      already_member: "You're already a member of %{tree}."
+      joined: "Welcome to %{tree}!"
+
   locale:
     en: EN
     ru: RU

@@ -18,9 +18,9 @@
     </header>
 
     <div class="person-panel-actions">
-      <%= link_to t("people.tree"), person_tree_path(@person), class: "button" %>
-      <%= link_to t("people.profile"), person_path(@person), class: "button button--outline" %>
-      <%= link_to t("people.edit_button"), edit_person_path(@person), class: "button button--outline" %>
+      <%= link_to t("people.tree"), person_tree_path(@person), class: "btn btn--reversed" %>
+      <%= link_to t("people.profile"), person_path(@person), class: "btn" %>
+      <%= link_to t("people.edit_button"), edit_person_path(@person), class: "btn" %>
     </div>
 
     <%# Add a relative without leaving the tree: the form loads into this same
@@ -30,7 +30,7 @@
       <% %w[parent partner child].each do |relation| %>
         <%= link_to t("family.relation_singular.#{relation}"),
               new_person_relative_path(@person, relation: relation, return_to: params[:return_to]),
-              class: "linkish", data: { turbo_frame: "person-panel" } %>
+              class: "btn btn--plain", data: { turbo_frame: "person-panel" } %>
       <% end %>
     </div>
 

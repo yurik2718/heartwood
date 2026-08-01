@@ -76,24 +76,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 .flash--alert { background: #f7e7e3; border-color: var(--danger); color: var(--danger); }
 
-/* Buttons & links — :not(:where(.btn)) so elements already migrated to the
-   canonical .btn primitive (buttons.css) aren't double-styled by this legacy
-   rule. :where() keeps the exclusion at zero added specificity, so it doesn't
-   also start beating .linkish/other class-based overrides on unmigrated
-   plain <button> elements (e.g. the sign-out button in the nav). */
-.button, button:not(:where(.btn)), input[type="submit"]:not(:where(.btn)) {
-  display: inline-block;
-  padding: 0.45rem 0.9rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font: inherit;
-  cursor: pointer;
-}
-.button:hover, button:not(:where(.btn)):hover { background: var(--accent-ink); text-decoration: none; }
-.linkish { background: none; color: var(--accent-ink); padding: 0.45rem 0.5rem; border: none; cursor: pointer; }
-
 /* Unified destructive affordance: subtle inline delete link (events, sources, …) */
 .delete-link {
   background: none;
@@ -171,18 +153,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .relative-picker .inline-title { margin: 0 0 0.5rem; font-weight: 600; text-transform: capitalize; }
 .relative-picker .form--inline { margin-top: 0; padding: 0; border: none; background: none; }
 
-/* :not(:where(.input)) so the relationship calculator's search field (migrated
-   to the canonical .input) isn't double-styled — relatives/new.html.erb's
-   combobox (shared with the protected tree-drawer) still uses this rule as-is. */
-.combobox input[type="search"]:not(:where(.input)) {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font: inherit;
-  background: #fff;
-}
-
 .combobox-options { list-style: none; margin: 0.4rem 0 0; padding: 0; }
 .combobox-options li { margin: 0; }
 .combobox-option {
@@ -228,7 +198,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .event-kind { font-weight: 600; min-width: 7rem; }
 .event-summary { color: var(--ink); flex: 1; }
 .event-actions { display: flex; gap: 0.25rem; }
-.event-actions .linkish { padding: 0 0.4rem; font-size: 0.85rem; }
 .sourced-badge { font-size: 0.75rem; color: var(--accent-ink); font-weight: 700; margin-left: 0.2rem; }
 .citation-add { font-size: 0.8rem; color: var(--muted); padding: 0 0 0.25rem; display: inline-block; }
 .citation-add:hover { color: var(--accent-ink); }
@@ -310,13 +279,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 /* Tree view */
 .tree-page { container-type: inline-size; }
 .tree-hint { color: var(--muted); font-size: 0.8rem; margin: -0.5rem 0 0.75rem; }
-
-.button--outline {
-  background: transparent;
-  color: var(--accent-ink);
-  border: 1px solid var(--accent);
-}
-.button--outline:hover { background: #eaf2e6; text-decoration: none; }
 
 .page-head-actions { display: flex; gap: 0.5rem; align-items: center; }
 

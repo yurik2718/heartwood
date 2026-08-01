@@ -18,6 +18,7 @@
       <%= hidden_field_tag :relation, @relation %>
       <%= hidden_field_tag :return_to, params[:return_to] %>
       <%= search_field_tag :q, nil,
+            class: "input",
             placeholder: t("family.combobox.placeholder"),
             autocomplete: "off",
             data: { search_target: "input", action: "input->search#debounce" } %>
@@ -31,19 +32,19 @@
           data: (panel ? { turbo_frame: "_top" } : {}) do |f| %>
       <%= hidden_field_tag :relation, @relation %>
       <%= hidden_field_tag :return_to, params[:return_to] %>
-      <div class="field"><%= f.label :given_names %><%= f.text_field :given_names %></div>
-      <div class="field"><%= f.label :surname %><%= f.text_field :surname %></div>
+      <div class="field"><%= f.label :given_names %><%= f.text_field :given_names, class: "input" %></div>
+      <div class="field"><%= f.label :surname %><%= f.text_field :surname, class: "input" %></div>
       <div class="field">
         <%= f.label :sex %>
-        <%= f.select :sex, Person::SEXES.map { |v| [t("people.sex.#{v}"), v] } %>
+        <%= f.select :sex, Person::SEXES.map { |v| [t("people.sex.#{v}"), v] }, {}, class: "input" %>
       </div>
       <div class="actions">
-        <%= f.submit t("people.add") %>
+        <%= f.submit t("people.add"), class: "btn btn--reversed" %>
         <% if panel %>
           <%= link_to t("forms.cancel"), panel_person_path(@person, return_to: params[:return_to]),
-                class: "linkish", data: { turbo_frame: "person-panel" } %>
+                class: "btn btn--plain", data: { turbo_frame: "person-panel" } %>
         <% else %>
-          <%= link_to t("forms.cancel"), person_path(@person), class: "linkish", data: { turbo_frame: "_top" } %>
+          <%= link_to t("forms.cancel"), person_path(@person), class: "btn btn--plain", data: { turbo_frame: "_top" } %>
         <% end %>
       </div>
     <% end %>

@@ -18,6 +18,14 @@ class Tree < ApplicationRecord
 
   validates :name, presence: true
   validates :plan, inclusion: { in: PLANS.keys }
+  validates :join_code, presence: true, uniqueness: true
+
+  before_validation { self.join_code ||= generate_join_code }
+
+  # Revokes the current invite link by swapping in a new code — see [[collaboration]].
+  def reset_join_code!
+    update! join_code: generate_join_code
+  end
 
   # The plan whose limits actually apply right now (family lapses back to free).
   def effective_plan
@@ -62,4 +70,10 @@ class Tree < ApplicationRecord
       [ -p.descendant_count, p.birth&.date_start&.year || Float::INFINITY, p.id ]
     end
   end
+
+  private
+    # Human-shareable format: "AB12-CD34-EF56" (once-campfire's join_code shape).
+    def generate_join_code
+      SecureRandom.alphanumeric(12).scan(/.{4}/).join("-")
+    end
 end

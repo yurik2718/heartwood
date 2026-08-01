@@ -2,6 +2,11 @@ en:
   nav:
     sign_out: Sign out
     all_people: All people
+    members: Members
+
+  active_tree:
+    flash:
+      not_a_member: You're not a member of that tree.
   locale:
     en: EN
     ru: RU

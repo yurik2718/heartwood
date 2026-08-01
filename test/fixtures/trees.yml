@@ -1,5 +1,7 @@
 alpha:
   name: Alpha Tree
+  join_code: ALFA-0001-JOIN
 
 beta:
   name: Beta Tree
+  join_code: BETA-0002-JOIN

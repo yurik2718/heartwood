@@ -6,14 +6,14 @@
     </div>
   <% end %>
 
-  <div class="field"><%= f.label :given_names %><%= f.text_field :given_names %></div>
-  <div class="field"><%= f.label :surname %><%= f.text_field :surname %></div>
-  <div class="field"><%= f.label :name_prefix %><%= f.text_field :name_prefix %></div>
-  <div class="field"><%= f.label :name_suffix %><%= f.text_field :name_suffix %></div>
-  <div class="field"><%= f.label :nickname %><%= f.text_field :nickname %></div>
+  <div class="field"><%= f.label :given_names %><%= f.text_field :given_names, class: "input" %></div>
+  <div class="field"><%= f.label :surname %><%= f.text_field :surname, class: "input" %></div>
+  <div class="field"><%= f.label :name_prefix %><%= f.text_field :name_prefix, class: "input" %></div>
+  <div class="field"><%= f.label :name_suffix %><%= f.text_field :name_suffix, class: "input" %></div>
+  <div class="field"><%= f.label :nickname %><%= f.text_field :nickname, class: "input" %></div>
   <div class="field">
     <%= f.label :sex %>
-    <%= f.select :sex, Person::SEXES.map { |v| [t("people.sex.#{v}"), v] } %>
+    <%= f.select :sex, Person::SEXES.map { |v| [t("people.sex.#{v}"), v] }, {}, class: "input" %>
   </div>
 
   <div class="field">
@@ -34,7 +34,7 @@
   </div>
 
   <div class="actions">
-    <%= f.submit %>
-    <%= link_to t("forms.cancel"), (person.persisted? ? person : people_path), class: "linkish" %>
+    <%= f.submit class: "btn btn--reversed" %>
+    <%= link_to t("forms.cancel"), (person.persisted? ? person : people_path), class: "btn btn--plain" %>
   </div>
 <% end %>

@@ -1,37 +1,14 @@
 /*
  * Heartwood — vanilla CSS (no framework). Modern CSS: custom properties + nesting.
  * Keep it calm, warm, and readable — see docs/vision.md.
+ *
+ * Design tokens live in colors.css; the shared reset/typography/interaction
+ * primitives (.btn, .input, .avatar, icons) live in their own files — see
+ * docs/references/prior-art.md for the once-campfire/writebook/fizzy pattern
+ * this follows. What's left here is page-specific styling not yet migrated:
+ * tree canvas + drawer, auth-screen chrome, relationship calc, place
+ * autocomplete, maps, hints, sources, events, search, profile tabs.
  */
-
-:root {
-  --bg: #faf8f5;
-  --surface: #ffffff;
-  --ink: #2c2622;
-  --muted: #8a807a;
-  --line: #e7e1da;
-  --accent: #6b8f5e;       /* heartwood green */
-  --accent-ink: #3f5a36;
-  --accent-wash: #eef3e9;  /* tint for selected/active accent surfaces */
-  --tree-edge: #b3a695;    /* tree connector lines — must stay visible on --bg */
-  --danger: #b4533f;
-  --danger-wash: #fbf3f1;
-  --danger-line: #e6c9c2;
-  --radius: 10px;
-  --maxw: 60rem;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  line-height: 1.55;
-}
-
-a { color: var(--accent-ink); text-decoration: none; }
-a:hover { text-decoration: underline; }
 
 .site-header {
   display: flex;
@@ -99,8 +76,12 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 .flash--alert { background: #f7e7e3; border-color: var(--danger); color: var(--danger); }
 
-/* Buttons & links */
-.button, button, input[type="submit"] {
+/* Buttons & links — :not(:where(.btn)) so elements already migrated to the
+   canonical .btn primitive (buttons.css) aren't double-styled by this legacy
+   rule. :where() keeps the exclusion at zero added specificity, so it doesn't
+   also start beating .linkish/other class-based overrides on unmigrated
+   plain <button> elements (e.g. the sign-out button in the nav). */
+.button, button:not(:where(.btn)), input[type="submit"]:not(:where(.btn)) {
   display: inline-block;
   padding: 0.45rem 0.9rem;
   background: var(--accent);
@@ -110,9 +91,8 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   font: inherit;
   cursor: pointer;
 }
-.button:hover, button:hover { background: var(--accent-ink); text-decoration: none; }
+.button:hover, button:not(:where(.btn)):hover { background: var(--accent-ink); text-decoration: none; }
 .linkish { background: none; color: var(--accent-ink); padding: 0.45rem 0.5rem; border: none; cursor: pointer; }
-.danger { background: var(--danger); margin-top: 1.5rem; }
 
 /* Unified destructive affordance: subtle inline delete link (events, sources, …) */
 .delete-link {
@@ -135,46 +115,31 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 .danger-zone h2 { margin: 0 0 0.25rem; font-size: 1rem; color: var(--danger); }
 .danger-zone p { margin: 0 0 0.75rem; font-size: 0.9rem; }
-.danger-zone .danger { margin-top: 0; }
 
-/* Avatars */
-.avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
-  object-fit: cover;
-}
-.avatar--thumb  { width: 32px;  height: 32px;  font-size: 0.65rem; }
-.avatar--medium { width: 72px;  height: 72px;  font-size: 1.2rem; }
-.avatar--large  { width: 96px;  height: 96px;  font-size: 1.6rem; }
-.avatar--gallery { width: 200px; height: 200px; border-radius: var(--radius); font-size: 2.5rem; }
-.avatar--initials { letter-spacing: 0.02em; }
-.avatar-preview { margin: 0.5rem 0; }
+/* .avatar itself lives in avatars.css now — still used here: */
 .field-hint { font-size: 0.8rem; color: var(--muted); }
 .profile-identity { display: flex; align-items: center; gap: 1rem; }
 
-/* People list */
+/* People list — canonical member-row shape: avatar, name, flexible separator
+   pushing trailing meta to the edge (see once-campfire/writebook member rows). */
 .people-list { list-style: none; padding: 0; margin: 0; }
 .person-row {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.55rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.6rem 0.25rem;
 
   a { font-weight: 600; font-size: 1.05rem; }
-  .years { color: var(--muted); font-size: 0.9rem; }
+  .years { color: var(--color-muted); font-size: 0.9rem; white-space: nowrap; }
 }
-.person-row__identity { display: flex; align-items: center; gap: 0.6rem; }
+.person-row:last-child { border-bottom: none; }
+.person-row .separator {
+  border: none;
+  border-top: 1px dotted var(--color-border-darker);
+  flex: 1;
+  margin: 0;
+}
 .empty { color: var(--muted); }
 
 /* Person show */
@@ -880,20 +845,8 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   h1 { margin: 0 0 0.35rem; font-size: 1.6rem; font-weight: 800; }
 }
 .auth-lede { margin: 0 0 1.25rem; color: var(--muted); }
-.auth-form { display: flex; flex-direction: column; gap: 0.75rem; }
-.auth-form input[type="text"],
-.auth-form input[type="email"],
-.auth-form input[type="password"] {
-  width: 100%;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font: inherit;
-  font-size: 1rem;
-  background: #fff;
-}
-.auth-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-.auth-form .button { width: 100%; padding: 0.7rem; font-size: 1rem; text-align: center; margin-top: 0.25rem; }
+.auth-form { display: flex; flex-direction: column; gap: 0.75rem; font-size: 1rem; }
+.auth-form .btn { width: 100%; padding: 0.7rem; font-size: 1rem; margin-top: 0.25rem; }
 .auth-hint { margin: -0.35rem 0 0; color: var(--muted); font-size: 0.85rem; }
 .auth-alt { margin: 1.1rem 0 0; color: var(--muted); font-size: 0.9rem; text-align: center; }
 
@@ -901,7 +854,10 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; max-width: 32rem; }
 .field { display: flex; flex-direction: column; margin-bottom: 0.85rem;
   label { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; }
-  input, select { padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
+
+  /* :not(.input) so fields already migrated to the canonical .input primitive
+     (inputs.css) aren't double-styled by this legacy rule. */
+  input:not(:where(.input)), select:not(:where(.input)) { padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
 }
 .form .actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
 .errors { background: #f7e7e3; border: 1px solid var(--danger); color: var(--danger); border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem;

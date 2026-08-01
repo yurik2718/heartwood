@@ -1,0 +1,44 @@
+/*
+ * Foundational typography/reset, plus the shared interaction language — a soft
+ * hover halo and a clear focus-visible ring — for the new .btn/.input primitives.
+ * Relocated verbatim from application.css; body still reads the legacy --bg/--ink
+ * aliases (colors.css) so this is a pure file move, not a visual change.
+ */
+:root {
+  --font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --hover-color: var(--color-border-darker);
+  --hover-size: 0.15em;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-family);
+  line-height: 1.55;
+  margin: 0;
+}
+
+a { color: var(--accent-ink); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+turbo-frame,
+turbo-cable-stream-source { display: contents; }
+
+/* New-primitive interaction feedback — scoped to .btn/.input so it doesn't reach
+   into unmigrated screens that still manage their own hover/focus styling. */
+:where(.btn, .input) {
+  transition: box-shadow 150ms ease, filter 150ms ease, background-color 150ms ease;
+
+  @media (any-hover: hover) {
+    &:where(:not(:active):hover) {
+      box-shadow: 0 0 0 var(--hover-size) var(--hover-color);
+    }
+  }
+
+  &:where(:not(:active)):focus-visible {
+    outline: 2px solid var(--color-selected-dark);
+    outline-offset: 2px;
+  }
+}

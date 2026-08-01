@@ -1,0 +1,48 @@
+/*
+ * .input — canonical pill text input.
+ * .input--actor — wraps a label around an icon + a borderless .input, so the
+ * *label* is the visible pill and the icon sits flush inside it (the
+ * icon-prefixed field look from once-campfire/writebook profile & auth forms).
+ */
+.input {
+  background-color: var(--input-background, var(--color-bg));
+  border-radius: var(--input-border-radius, 0.5em);
+  border: var(--input-border-size, 1px) solid var(--input-border-color, var(--color-border-darker));
+  color: var(--input-color, var(--color-text));
+  font: inherit;
+  font-size: max(16px, 1em);
+  inline-size: 100%;
+  padding: var(--input-padding, 0.5em 0.8em);
+}
+
+.input:focus {
+  --input-border-color: var(--color-selected-dark);
+
+  outline: none;
+}
+
+.input--actor {
+  align-items: center;
+  background-color: var(--color-bg);
+  border-radius: 0.5em;
+  border: 1px solid var(--color-border-darker);
+  display: flex;
+  gap: 0.6em;
+  padding: 0.5em 0.8em;
+}
+
+.input--actor:focus-within {
+  border-color: var(--color-selected-dark);
+}
+
+.input--actor .input {
+  --input-padding: 0;
+  --input-border-radius: 0;
+  --input-background: transparent;
+  --input-border-size: 0;
+}
+
+.input--actor .icon {
+  flex: 0 0 auto;
+  color: var(--color-muted);
+}

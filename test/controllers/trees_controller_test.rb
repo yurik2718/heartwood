@@ -76,12 +76,12 @@ class TreesControllerTest < ActionDispatch::IntegrationTest
 
   test "depth control minus is disabled at minimum depth" do
     get person_tree_url(@person, depth: 1)
-    assert_select "span.button--disabled", text: "−"
+    assert_select "span.btn[aria-disabled='true']", text: "−"
   end
 
   test "depth control plus is disabled at maximum depth" do
     get person_tree_url(@person, depth: 6)
-    assert_select "span.button--disabled", text: "+"
+    assert_select "span.btn[aria-disabled='true']", text: "+"
   end
 
   test "node link loads the person panel into the drawer frame" do

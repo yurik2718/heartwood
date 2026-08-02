@@ -253,8 +253,29 @@ en:
     none_for_person: No sources cited yet. Add a source to any life event.
     source_title_label: Title
     source_url_label: URL (optional)
+    source_author_label: Author (optional)
+    source_repository_label: Repository (optional)
+    source_type_label: Type (optional)
+    source_types:
+      census: Census
+      certificate: Certificate
+      book: Book
+      website: Website
+      oral_history: Oral history
+      other: Other
     citation_text_label: Notes (optional)
     citation_text_placeholder: "e.g. page 42, parish register"
+    page_label: Page / detail (optional)
+    text_label: Quoted text (optional)
+    text_placeholder: "e.g. “born the third of March”"
+    date_label: Citation date (optional)
+    confidence_label: Confidence
+    confidence:
+      very_low: Very low
+      low: Low
+      normal: Normal
+      high: High
+      very_high: Very high
     flash:
       created: Source added.
       destroyed: Source removed.

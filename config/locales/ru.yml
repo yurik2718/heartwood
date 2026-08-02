@@ -250,8 +250,29 @@ ru:
     none_for_person: Источников пока нет. Добавьте источник к любому жизненному событию.
     source_title_label: Название
     source_url_label: URL (необязательно)
+    source_author_label: Автор (необязательно)
+    source_repository_label: Хранилище (необязательно)
+    source_type_label: Тип (необязательно)
+    source_types:
+      census: Перепись
+      certificate: Свидетельство
+      book: Книга
+      website: Веб-сайт
+      oral_history: Устный рассказ
+      other: Другое
     citation_text_label: Примечание (необязательно)
     citation_text_placeholder: "напр. стр. 42, метрическая книга"
+    page_label: Страница / деталь (необязательно)
+    text_label: Цитата (необязательно)
+    text_placeholder: "напр. «родился третьего марта»"
+    date_label: Дата цитирования (необязательно)
+    confidence_label: Достоверность
+    confidence:
+      very_low: Очень низкая
+      low: Низкая
+      normal: Обычная
+      high: Высокая
+      very_high: Очень высокая
     flash:
       created: Источник добавлен.
       destroyed: Источник удалён.

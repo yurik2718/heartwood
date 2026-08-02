@@ -70,6 +70,10 @@ deliberately:
 - Lean on a Ruby GEDCOM parsing gem if a maintained one fits the vanilla-stack rule; otherwise
   a small hand-written line parser is very doable (the grammar is simple). Evaluate in Phase 2.
 - The whole pipeline (upload → parse → map → report) is described in [[import-export]].
+- **Gap:** `app/services/gedcom/writer.rb` does not emit `SOUR`/`CITA`/`QUAY` at all yet —
+  exported files currently carry no source/citation data. The confidence → `QUAY` mapping
+  decision lives in [[source-citation]]; wiring it into the writer is real, separate work for
+  whenever source export is built, not something to assume is already covered.
 
 ## Related
 - [[import-export]] · [[domain-model]] · [[source-citation]] · [[media]] · [[adr/0004-gedcom-interop]]

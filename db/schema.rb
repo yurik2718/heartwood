@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_01_230217) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_02_031014) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -52,8 +52,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_01_230217) do
   create_table "citations", force: :cascade do |t|
     t.integer "citable_id", null: false
     t.string "citable_type", null: false
+    t.string "confidence", default: "normal", null: false
     t.datetime "created_at", null: false
+    t.date "date"
+    t.string "page"
     t.integer "source_id", null: false
+    t.text "text"
     t.datetime "updated_at", null: false
     t.index ["citable_type", "citable_id"], name: "index_citations_on_citable"
     t.index ["source_id"], name: "index_citations_on_source_id"
@@ -181,8 +185,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_01_230217) do
   end
 
   create_table "sources", force: :cascade do |t|
+    t.string "author"
     t.text "citation_text"
     t.datetime "created_at", null: false
+    t.string "repository"
+    t.string "source_type"
     t.string "title", null: false
     t.integer "tree_id", null: false
     t.datetime "updated_at", null: false

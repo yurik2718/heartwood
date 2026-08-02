@@ -51,4 +51,49 @@ class SourceCitationTest < ActiveSupport::TestCase
     source.destroy!
     assert_raises(ActiveRecord::RecordNotFound) { citation.reload }
   end
+
+  test "citation confidence defaults to normal" do
+    source   = Source.create!(title: "Census 1901", tree: @tree)
+    citation = Citation.create!(source: source, citable: @event)
+    assert citation.normal?
+  end
+
+  test "citation confidence rejects an invalid level" do
+    source = Source.create!(title: "Census 1901", tree: @tree)
+    assert_raises(ArgumentError) do
+      Citation.create!(source: source, citable: @event, confidence: "extremely_high")
+    end
+  end
+
+  test "citation stores page, quoted text, date, and confidence" do
+    source   = Source.create!(title: "Parish register", tree: @tree)
+    citation = Citation.create!(
+      source: source, citable: @event,
+      page: "p. 42", text: "born the third of March", date: Date.new(1881, 4, 3),
+      confidence: "very_high"
+    )
+    citation.reload
+    assert_equal "p. 42", citation.page
+    assert_equal "born the third of March", citation.text
+    assert_equal Date.new(1881, 4, 3), citation.date
+    assert citation.very_high?
+  end
+
+  test "citation confidence_label renders via I18n" do
+    source   = Source.create!(title: "Census 1901", tree: @tree)
+    citation = Citation.create!(source: source, citable: @event, confidence: "low")
+    assert_equal I18n.t("citations.confidence.low"), citation.confidence_label
+  end
+
+  test "source stores author, repository, and source_type" do
+    source = Source.create!(
+      title: "1881 England Census", tree: @tree,
+      author: "General Register Office", repository: "The National Archives",
+      source_type: "census"
+    )
+    source.reload
+    assert_equal "General Register Office", source.author
+    assert_equal "The National Archives", source.repository
+    assert_equal "census", source.source_type
+  end
 end

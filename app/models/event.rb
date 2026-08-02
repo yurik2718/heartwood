@@ -30,6 +30,13 @@ class Event < ApplicationRecord
     I18n.t("events.kinds.#{kind}", default: KINDS.fetch(kind, kind))
   end
 
+  # The strongest confidence among this event's citations, or nil if unsourced —
+  # what the .sourced-badge shows (see docs/features/sources-evidence.md).
+  def best_citation_confidence
+    order = Citation.confidences.keys
+    citations.max_by { |c| order.index(c.confidence) }&.confidence
+  end
+
   # What to show next to the label: the date for events, the value for facts.
   def summary
     date_raw.presence || value.presence

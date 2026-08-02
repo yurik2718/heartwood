@@ -239,6 +239,8 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .event-summary { color: var(--ink); flex: 1; }
 .event-actions { display: flex; gap: 0.25rem; }
 .sourced-badge { font-size: 0.75rem; color: var(--accent-ink); font-weight: 700; margin-left: 0.2rem; }
+.sourced-badge--very_low, .sourced-badge--low { opacity: 0.55; }
+.sourced-badge--normal { opacity: 0.8; }
 .citation-add { font-size: 0.8rem; color: var(--muted); padding: 0 0 0.25rem; display: inline-block; }
 .citation-add:hover { color: var(--accent-ink); }
 
@@ -254,7 +256,11 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .source-event-label:first-child { margin-top: 0; }
 .source-item { margin: 0 0 0.5rem 0; padding: 0.75rem; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--line); }
 .source-title { margin: 0 0 0.25rem; font-weight: 600; }
+.source-meta { margin: 0.1rem 0; font-size: 0.85rem; }
+.source-quote { margin: 0.3rem 0; padding-left: 0.6rem; border-left: 2px solid var(--line); font-size: 0.9rem; font-style: italic; }
 .source-citation-text { margin: 0.2rem 0; font-size: 0.9rem; }
+.confidence-badge { font-size: 0.72rem; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.4rem; }
+.confidence-badge--high, .confidence-badge--very_high { color: var(--accent-ink); border-color: var(--accent); }
 .memories-gallery { display: flex; gap: 1rem; flex-wrap: wrap; }
 
 /* Search */

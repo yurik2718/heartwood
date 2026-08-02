@@ -18,7 +18,7 @@ class PersonGraphTest < ActiveSupport::TestCase
 
   test "ancestor_graph for isolated person has only the focus node" do
     loner = Person.create!(sex: "U", tree: @tree)
-    graph = loner.ancestor_graph
+    graph = loner.ancestor_graph(ghosts: false)   # traversal semantics, sans add-slots
     assert_equal 1, graph[:nodes].size
     assert_empty  graph[:edges]
     assert_equal  loner.id, graph[:focus_id]
@@ -81,6 +81,71 @@ class PersonGraphTest < ActiveSupport::TestCase
     assert_equal "Bach",             node[:surname]
   end
 
+  test "nodes carry the partnered flag that picks the card or circle shape" do
+    graph = @child.ancestor_graph(depth: 1)
+    by_id = graph[:nodes].index_by { |n| n[:id] }
+    assert by_id[@father.id][:partnered], "couple member should be partnered"
+    assert by_id[@mother.id][:partnered], "couple member should be partnered"
+    assert_not by_id[@child.id][:partnered], "single should not be partnered"
+  end
+
+  test "nodes carry a compact lifespan string" do
+    dated = Person.create!(given_names: "Dated", sex: "M", tree: @tree)
+    Event.create!(kind: "BIRT", eventable: dated, tree: @tree, date_raw: "23 MAY 1767", date_start: Date.new(1767, 5, 23))
+    Event.create!(kind: "DEAT", eventable: dated, tree: @tree, date_raw: "1837", date_start: Date.new(1837, 1, 1))
+    node = dated.send(:node_data, dated, generation: 0, order: 0)
+    assert_equal "1767 – 1837", node[:years]
+  end
+
+  test "lifespan falls back to the raw date string when the date did not parse" do
+    approx = Person.create!(given_names: "Approx", sex: "M", tree: @tree)
+    Event.create!(kind: "BIRT", eventable: approx, tree: @tree, date_raw: "ок. 1696")
+    Event.create!(kind: "DEAT", eventable: approx, tree: @tree)
+    node = approx.send(:node_data, approx, generation: 0, order: 0)
+    assert_equal "ок. 1696", node[:years]
+  end
+
+  # --- ghost add-relative slots ---
+
+  test "ancestor_graph adds an add-parent ghost above ancestors with no parents" do
+    graph  = @child.ancestor_graph(depth: 2)
+    ghosts = graph[:nodes].select { |n| n[:ghost] }
+    assert_equal %w[parent parent], ghosts.map { |n| n[:ghost] }
+    assert_equal [ @father.id, @mother.id ].sort, ghosts.map { |n| n[:ghost_for] }.sort
+    assert ghosts.all? { |n| n[:id].negative? }, "ghost ids must never collide with people"
+  end
+
+  test "no parent ghost when the frontier is cut by depth" do
+    graph = @child.ancestor_graph(depth: 1)
+    assert_empty graph[:nodes].select { |n| n[:ghost] }
+  end
+
+  test "descendant_graph adds partner and child ghosts for a single focus" do
+    loner = Person.create!(sex: "M", tree: @tree)
+    graph = loner.descendant_graph(depth: 2)
+    ghosts = graph[:nodes].select { |n| n[:ghost] }
+    assert_equal %w[child partner], ghosts.map { |n| n[:ghost] }.sort
+    partner_ghost = ghosts.find { |n| n[:ghost] == "partner" }
+    assert partner_ghost[:partnered], "partner ghost should render as the couple's second card"
+  end
+
+  test "no partner ghost when the focus couple is already shown" do
+    graph = @father.descendant_graph(depth: 1)
+    assert_equal %w[child], graph[:nodes].select { |n| n[:ghost] }.map { |n| n[:ghost] }
+  end
+
+  test "ghosts are not added for viewers outside the tree" do
+    Current.reset
+    Current.session = users(:two).sessions.create!
+    graph = @child.ancestor_graph(depth: 2)
+    assert_empty graph[:nodes].select { |n| n[:ghost] }
+  end
+
+  test "ghosts can be disabled explicitly" do
+    graph = @child.ancestor_graph(depth: 2, ghosts: false)
+    assert_empty graph[:nodes].select { |n| n[:ghost] }
+  end
+
   test "redacted living node carries no given or surname" do
     Current.reset
     Current.session = users(:two).sessions.create!   # outsider — living people are redacted
@@ -105,7 +170,7 @@ class PersonGraphTest < ActiveSupport::TestCase
 
   test "descendant_graph for person with no children has only the focus node" do
     loner = Person.create!(sex: "U", tree: @tree)
-    graph = loner.descendant_graph
+    graph = loner.descendant_graph(ghosts: false)   # traversal semantics, sans add-slots
     assert_equal 1,             graph[:nodes].size
     assert_empty                graph[:edges]
     assert_equal "descendants", graph[:mode]
@@ -211,7 +276,7 @@ class PersonGraphTest < ActiveSupport::TestCase
     fam.partners << solo
     fam.children << kid
 
-    graph = solo.descendant_graph(depth: 1)
+    graph = solo.descendant_graph(depth: 1, ghosts: false)
     assert_empty graph[:unions]
     assert_equal [ solo.id, kid.id ].sort, graph[:nodes].map { |n| n[:id] }.sort
   end

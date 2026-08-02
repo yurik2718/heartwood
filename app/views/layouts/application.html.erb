@@ -44,8 +44,22 @@
         </nav>
         <% if authenticated? %>
           <%= turbo_stream_from Current.tree, :hints %>
+          <% if Current.user.trees.size > 1 %>
+            <details class="tree-switcher">
+              <summary class="btn btn--plain"><%= Current.tree.name %></summary>
+              <menu class="tree-switcher__menu">
+                <% Current.user.tree_memberships.includes(:tree).each do |m| %>
+                  <li>
+                    <%= button_to m.tree.name, active_tree_path(tree_id: m.tree_id), method: :patch,
+                          class: "btn btn--plain #{"btn--reversed" if m.tree_id == Current.tree.id}" %>
+                  </li>
+                <% end %>
+              </menu>
+            </details>
+          <% end %>
+          <%= link_to t("nav.members"), tree_memberships_path, class: "btn btn--plain" %>
           <%= render "hints/badge", count: Current.tree.duplicate_hints.pending.count %>
-          <%= button_to t("nav.sign_out"), session_path, method: :delete, class: "linkish" %>
+          <%= button_to t("nav.sign_out"), session_path, method: :delete, class: "btn btn--plain" %>
         <% end %>
       </div>
     </header>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_02_031014) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -52,8 +52,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
   create_table "citations", force: :cascade do |t|
     t.integer "citable_id", null: false
     t.string "citable_type", null: false
+    t.string "confidence", default: "normal", null: false
     t.datetime "created_at", null: false
+    t.date "date"
+    t.string "page"
     t.integer "source_id", null: false
+    t.text "text"
     t.datetime "updated_at", null: false
     t.index ["citable_type", "citable_id"], name: "index_citations_on_citable"
     t.index ["source_id"], name: "index_citations_on_source_id"
@@ -127,6 +131,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
     t.index ["tree_id"], name: "index_family_partners_on_tree_id"
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.string "provider_payment_id"
+    t.string "status", default: "pending", null: false
+    t.integer "tree_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider_payment_id"], name: "index_payments_on_provider_payment_id", unique: true
+    t.index ["tree_id"], name: "index_payments_on_tree_id"
+  end
+
   create_table "people", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.json "gedcom_raw"
@@ -160,16 +175,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
 
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.integer "current_tree_id"
     t.string "ip_address"
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.integer "user_id", null: false
+    t.index ["current_tree_id"], name: "index_sessions_on_current_tree_id"
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
   create_table "sources", force: :cascade do |t|
+    t.string "author"
     t.text "citation_text"
     t.datetime "created_at", null: false
+    t.string "repository"
+    t.string "source_type"
     t.string "title", null: false
     t.integer "tree_id", null: false
     t.datetime "updated_at", null: false
@@ -191,8 +211,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
 
   create_table "trees", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "join_code", null: false
     t.string "name"
+    t.string "plan", default: "free", null: false
+    t.datetime "plan_expires_at"
     t.datetime "updated_at", null: false
+    t.index ["join_code"], name: "index_trees_on_join_code", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -218,8 +242,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_150002) do
   add_foreign_key "family_partners", "families"
   add_foreign_key "family_partners", "people"
   add_foreign_key "family_partners", "trees"
+  add_foreign_key "payments", "trees"
   add_foreign_key "people", "trees"
   add_foreign_key "places", "trees"
+  add_foreign_key "sessions", "trees", column: "current_tree_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "sources", "trees"
   add_foreign_key "tree_memberships", "trees"

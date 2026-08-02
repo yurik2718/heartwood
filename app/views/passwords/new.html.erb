@@ -5,10 +5,13 @@
     <h1><%= t("auth.forgot_title") %></h1>
 
     <%= form_with url: passwords_path, class: "auth-form" do |form| %>
-      <%= form.email_field :email_address, required: true, autofocus: true,
-            autocomplete: "username", placeholder: t("auth.email_placeholder"),
-            value: params[:email_address] %>
-      <%= form.submit t("auth.reset_submit"), class: "button" %>
+      <label class="input--actor">
+        <%= form.email_field :email_address, class: "input", required: true, autofocus: true,
+              autocomplete: "username", placeholder: t("auth.email_placeholder"),
+              value: params[:email_address] %>
+        <%= icon_tag "email" %>
+      </label>
+      <%= form.submit t("auth.reset_submit"), class: "btn btn--reversed" %>
     <% end %>
 
     <p class="auth-alt">

@@ -7,6 +7,14 @@ Rails.application.routes.draw do
   resource :export, only: :create
   resources :passwords, param: :token
 
+  # Collaboration: joining a tree via invite link, switching which tree is
+  # active, and the owner's member-management page. See [[collaboration]].
+  get  "join/:join_code", to: "joins#new",  as: :join
+  post "join/:join_code", to: "joins#create"
+  resource  :active_tree, only: :update
+  resources :tree_memberships, only: %i[index update destroy]
+  resource  :tree_join_code, only: :create
+
   get "places/search",  to: "places#search",  as: :search_places
   get "places/geocode", to: "places#geocode", as: :geocode_places
 
@@ -33,6 +41,7 @@ Rails.application.routes.draw do
     end
     member do
       get :map, to: "maps#person"
+      get :panel
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

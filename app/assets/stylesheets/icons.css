@@ -1,0 +1,30 @@
+/*
+ * Mask-image icon system (fizzy's approach, reimplemented here — not copied):
+ * a currentColor mask means icons theme for free under dark mode / inside
+ * .btn--reversed, no separate "invert for dark backgrounds" filter needed.
+ * Add an `.icon--<name> { --svg: url("<name>.svg"); }` line per icon as needed.
+ */
+.icon {
+  background-color: currentColor;
+  block-size: var(--icon-size, 1em);
+  display: inline-block;
+  flex-shrink: 0;
+  inline-size: var(--icon-size, 1em);
+  mask-image: var(--svg);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: var(--icon-size, 1em);
+}
+
+.icon--person { --svg: url("person.svg"); }
+.icon--email { --svg: url("email.svg"); }
+.icon--password { --svg: url("password.svg"); }
+.icon--crown { --svg: url("crown.svg"); }
+.icon--minus { --svg: url("minus.svg"); }
+.icon--copy-paste { --svg: url("copy-paste.svg"); }
+.icon--refresh { --svg: url("refresh.svg"); }
+.icon--pencil { --svg: url("pencil.svg"); }
+.icon--trash { --svg: url("trash.svg"); }
+.icon--add { --svg: url("add.svg"); }
+.icon--search { --svg: url("search.svg"); }
+.icon--check { --svg: url("check.svg"); }

@@ -22,7 +22,7 @@ Implementation approach: [[tree-rendering]].
 A whole род is really a *graph* (marriages join lines, remarriage and cousin marriage make
 diamonds), so there is no single tidy layout for "everyone at once". The honest, intuitive
 answer is to render the **full descendancy from one progenitor** — the one case where the род
-*is* a tree — and lean on navigation (click-to-refocus, depth, pan/zoom) for the rest.
+*is* a tree — and lean on navigation (the person panel with refocus, depth, pan/zoom) for the rest.
 
 - **Progenitor** = `Tree#root_person`: the parentless ancestor with the most descendants
   (ties → earliest birth → id). Computed, not stored, so it tracks the data. From any person
@@ -72,28 +72,49 @@ A **vertical tidy tree** (Reingold–Tilford in spirit). Generations are horizon
 within a row comes from a post-order pass so a parent sits centred over its children and
 sibling subtrees never overlap.
 
-- **Orientation.** Descendants: focus on top, generations grow downward (`y = gen·ROW_H`).
-  Ancestors: focus at the bottom, generations grow upward (`y = (maxGen − gen)·ROW_H`) so the
-  oldest generation is on top — the genealogical "top-down" read.
+- **Orientation.** Descendants: focus on top, generations grow downward. Ancestors: focus at
+  the bottom, generations grow upward (row order flipped via `maxGen − gen`) so the oldest
+  generation is on top — the genealogical "top-down" read. Each row is as tall as its tallest
+  unit (cards and circles mix); shorter units are centred vertically within the row.
 - **Units, not people.** The layout works on *units*: a **couple** (two partner cards joined by
-  a short horizontal connector) or a **single** person. The tidy pass treats a unit as one
-  block of width 1 or 2 cards. When a parent unit is wider than its children's span (a couple
-  over a lone child), the children are shifted to stay centred — correctness (no overlap) first,
-  aesthetics second.
+  a bond line with a ♥) or a **single** person (a circle). The tidy pass treats a unit as one
+  block. When a parent unit is wider than its children's span (a couple over a lone child), the
+  children are shifted to stay centred — correctness (no overlap) first, aesthetics second.
 - **Hierarchy from `edges`, grouping from `unions`.** The parent→child structure is the
   server's `edges` (`from_id` = layout-parent/focus-side, `to_id` = layout-child, in both
   modes) lifted onto units; `unions` only decide which cards sit side-by-side. First edge into
   a unit wins, so a person reached twice via pedigree collapse is placed once (spanning tree).
-- **Cards.** A node card shows the name on **two lines** — given names over surname — so
-  full Russian ФИО stay readable at the fixed card width (210×72, `NODE_W`/`NODE_H` in
-  `tree_controller.js`, mirrored in `.tree-node` CSS). When either half of the name is
-  missing the card falls back to the single-line `display_name`. Nickname/prefix/suffix are
-  profile-only detail — the card stays compact.
-- **Edges.** Vertical béziers from a parent unit's centre to each child unit's centre, drawn in
-  the growth direction. Edges use a dedicated visible stroke (`--tree-edge`), not the faint
-  hairline `--line`. A couple's two cards are joined by a short horizontal connector drawn as
-  a **thicker bond line** (`.tree-edge--bond`), so marriage reads differently from descent;
-  their children descend from the connector's midpoint.
+- **Two node shapes**, decided server-side (`node[:partnered]`, derived from the same `unions`
+  the JS groups by, so shape and grouping never disagree). Couple members render as **banded
+  cards** (`CARD_W×CARD_H`): a sex-coloured band across the top carries the surname (later: the
+  kinship label), the body holds avatar + given names + lifespan. Singles render as **ringed
+  circles** (`CIRC_D`) with the name and lifespan inside. Sizes live in `tree_controller.js`
+  and are mirrored in `.tree-node--card`/`.tree-node--circle` CSS. Nickname/prefix/suffix are
+  profile-only detail — nodes stay compact.
+- **Edges.** Orthogonal elbows (down, across, down) from a parent unit to each child unit; the
+  horizontal bus sits in the gap between rows. Edges use a dedicated visible stroke
+  (`--tree-edge`), not the faint hairline `--line`. A couple's cards are joined by a **thicker
+  bond line** (`.tree-edge--bond`) with a **♥ marker** in the gap between the cards, so marriage
+  reads differently from descent; their children's line drops from the bond midpoint through
+  that gap.
+- **Person panel.** Clicking a node loads `people#panel` into the `person-panel` turbo-frame
+  inside a slide-over drawer (`drawer_controller.js`): avatar, name, lifespan, birth/death
+  details, add-relative shortcuts, and buttons to refocus the tree on that person, open the
+  profile, or edit. Node clicks never navigate away from the canvas.
+- **Ghost add-relative slots.** Dashed placeholder nodes at the growth frontier, members only
+  (`Person#collect_ghosts`, negative ids riding the normal graph pipeline): "add parent" above
+  every ancestor with no recorded parents, "add partner"/"add child" on the focus in
+  descendants mode (the clan view opts out). A ghost opens `relatives#new` in the panel; the
+  create round-trip carries `return_to` (checked with `url_from`) back to the tree.
+- **Camera & input.** Wheel zoom anchored at the cursor, one-finger pan, two-finger pinch,
+  +/−/fit/print buttons, and keyboard: arrows walk partner/sibling/generations, Enter opens
+  the panel. Live search dims non-matches on the canvas and flies to the picked person.
+- **Big-tree ergonomics.** Past ~60 people the first load folds branches beyond 3 rows from
+  the focus (`_autoCollapse`); a mini map with a viewport rectangle appears whenever the tree
+  overflows the canvas (click = jump). Camera and folded branches persist per
+  focus/mode/depth in localStorage, invalidated when the node count changes.
+- **Print.** The print button scales the layout to page width, strips all chrome via the
+  print stylesheet, and restores the camera afterwards.
 - **Viewport.** Pan/zoom live in the controller. On load the camera **fits the whole tree**
   in the canvas: zoom out (never in) until it fits, floored at `MIN_FIT` — below that a huge
   tree would shrink to confetti, so the camera falls back to centring the focus card. Wheel

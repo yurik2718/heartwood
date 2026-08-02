@@ -17,14 +17,23 @@
     <% end %>
 
     <%= form_with model: @user, url: registration_path, class: "auth-form" do |form| %>
-      <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name",
-            placeholder: t("registrations.name_placeholder") %>
-      <%= form.email_field :email_address, required: true, autocomplete: "username",
-            placeholder: t("auth.email_placeholder") %>
-      <%= form.password_field :password, required: true, autocomplete: "new-password",
-            minlength: 8, maxlength: 72, placeholder: t("registrations.password_placeholder") %>
+      <label class="input--actor">
+        <%= form.text_field :name, class: "input", required: true, autofocus: true, autocomplete: "name",
+              placeholder: t("registrations.name_placeholder") %>
+        <%= icon_tag "person" %>
+      </label>
+      <label class="input--actor">
+        <%= form.email_field :email_address, class: "input", required: true, autocomplete: "username",
+              placeholder: t("auth.email_placeholder") %>
+        <%= icon_tag "email" %>
+      </label>
+      <label class="input--actor">
+        <%= form.password_field :password, class: "input", required: true, autocomplete: "new-password",
+              minlength: 8, maxlength: 72, placeholder: t("registrations.password_placeholder") %>
+        <%= icon_tag "password" %>
+      </label>
       <p class="auth-hint"><%= t("registrations.password_hint") %></p>
-      <%= form.submit t("registrations.submit"), class: "button" %>
+      <%= form.submit t("registrations.submit"), class: "btn btn--reversed" %>
     <% end %>
 
     <p class="auth-alt">

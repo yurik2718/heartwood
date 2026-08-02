@@ -12,6 +12,7 @@ class RelativesController < ApplicationController
 
   before_action :set_person
   before_action :set_relation
+  before_action :require_can_edit, only: %i[new create]
 
   def new
     @relative = Person.new
@@ -25,9 +26,15 @@ class RelativesController < ApplicationController
 
   def create
     @relative = @person.public_send(RELATION_METHODS.fetch(@relation), relative_source)
-    respond_to do |format|
-      format.turbo_stream
-      format.html { redirect_to @person, notice: t("family.flash.#{@relation}_added") }
+    # From the tree's panel the form carries return_to (the tree page) — land back
+    # there so the new person appears in the graph. url_from rejects foreign hosts.
+    if (return_url = url_from(params[:return_to]))
+      redirect_to return_url, notice: t("family.flash.#{@relation}_added")
+    else
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @person, notice: t("family.flash.#{@relation}_added") }
+      end
     end
   end
 

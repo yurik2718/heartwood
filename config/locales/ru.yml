@@ -2,6 +2,36 @@ ru:
   nav:
     sign_out: Выйти
     all_people: Все люди
+    members: Участники
+
+  active_tree:
+    flash:
+      not_a_member: Вы не участник этого дерева.
+
+  joins:
+    title: "Присоединиться к «%{tree}»"
+    heading: "Вас пригласили в «%{tree}»"
+    lede: Присоединяйтесь, чтобы вместе просматривать и дополнять древо.
+    submit: Присоединиться
+    flash:
+      already_member: "Вы уже участник «%{tree}»."
+      joined: "Добро пожаловать в «%{tree}»!"
+
+  tree_memberships:
+    title: Участники
+    copy_link: Скопировать ссылку
+    reset_link: Создать новую ссылку
+    reset_confirm: Старая пригласительная ссылка перестанет работать. Продолжить?
+    role_toggle_title: Переключить редактор/читатель
+    remove: Удалить
+    remove_confirm: "Удалить %{name} из этого дерева?"
+    roles:
+      owner: Владелец
+      editor: Редактор
+      viewer: Читатель
+    flash:
+      code_reset: Ссылка обновлена. Старая ссылка больше не работает.
+
   locale:
     en: EN
     ru: RU
@@ -48,6 +78,12 @@ ru:
     search_clear: Сбросить
     sex_filter_all: Все
     sex_label: Пол
+    sort:
+      surname_asc: Имя (А–Я)
+      surname_desc: Имя (Я–А)
+      birth_asc: Дата рождения (сначала старые)
+      birth_desc: Дата рождения (сначала новые)
+      created_desc: Недавно добавленные
     status_label: Статус
     nickname_label: Прозвище
     status:
@@ -70,7 +106,7 @@ ru:
     children: Дети
     siblings: Братья и сёстры
     none: Нет записей.
-    add: "+ Добавить %{relation}"
+    add: "Добавить %{relation}"
     add_title: "Добавить %{relation}"
     relation_singular:
       parent: родителя
@@ -172,7 +208,7 @@ ru:
   events:
     title: Жизненные события
     none: Событий пока нет.
-    add: "+ Добавить событие"
+    add: "Добавить событие"
     kind_label: Тип
     date_label: Дата
     detail_label: Подробности
@@ -181,8 +217,8 @@ ru:
     detail_placeholder: "напр. Инженер"
     place_label: Место
     place_placeholder: "напр. Бостон, Массачусетс"
-    add_birthplace: + Место рождения
-    add_residence: + Где жил
+    add_birthplace: Место рождения
+    add_residence: Где жил
     remove_confirm: Удалить это событие?
     edit: Изменить
     remove: Удалить
@@ -204,7 +240,7 @@ ru:
       EDUC: Образование
 
   citations:
-    add: + Добавить источник
+    add: Добавить источник
     add_title: "Добавить источник для «%{event}»"
     submit_add: Сохранить источник
     sourced_badge: "✓"
@@ -214,8 +250,29 @@ ru:
     none_for_person: Источников пока нет. Добавьте источник к любому жизненному событию.
     source_title_label: Название
     source_url_label: URL (необязательно)
+    source_author_label: Автор (необязательно)
+    source_repository_label: Хранилище (необязательно)
+    source_type_label: Тип (необязательно)
+    source_types:
+      census: Перепись
+      certificate: Свидетельство
+      book: Книга
+      website: Веб-сайт
+      oral_history: Устный рассказ
+      other: Другое
     citation_text_label: Примечание (необязательно)
     citation_text_placeholder: "напр. стр. 42, метрическая книга"
+    page_label: Страница / деталь (необязательно)
+    text_label: Цитата (необязательно)
+    text_placeholder: "напр. «родился третьего марта»"
+    date_label: Дата цитирования (необязательно)
+    confidence_label: Достоверность
+    confidence:
+      very_low: Очень низкая
+      low: Низкая
+      normal: Обычная
+      high: Высокая
+      very_high: Очень высокая
     flash:
       created: Источник добавлен.
       destroyed: Источник удалён.
@@ -227,7 +284,9 @@ ru:
     title: "%{name} — Семейное дерево"
     ancestors: Предки
     descendants: Потомки
-    hint: "Колёсиком — масштаб · перетащите — панорама · клик — перефокус"
+    hint: "Колёсиком — масштаб · перетащите — панорама · клик — карточка человека · стрелки — навигация"
+    canvas_label: "Семейное дерево: стрелки — переход между родственниками, Enter — карточка человека, плюс и минус — масштаб"
+    close_panel: Закрыть панель
     depth_label: Поколения
     default_name: Моё дерево
     clan_link: Родовое древо
@@ -236,6 +295,16 @@ ru:
     search_placeholder: Найти человека…
     expand: Развернуть ветвь
     collapse: Свернуть ветвь
+    add_relative: Добавить
+    zoom_in: Приблизить
+    zoom_out: Отдалить
+    zoom_fit: Показать всё дерево
+    print: Распечатать дерево
+    ghost_for: "Для: %{name}"
+    ghost:
+      parent: Добавить родителя
+      partner: Добавить партнёра
+      child: Добавить ребёнка
 
   auth:
     sign_in_title: Вход в Heartwood
@@ -278,6 +347,8 @@ ru:
     password_instructions: "Инструкции отправлены (если пользователь с таким email существует)."
     passwords_mismatch: Пароли не совпадают.
     invalid_token: Ссылка для сброса пароля недействительна или устарела.
+    read_only: У вас доступ только для чтения в этом дереве.
+    owners_only: Это может сделать только владелец дерева.
 
   mailer:
     password_reset:
@@ -384,6 +455,8 @@ ru:
       models:
         person:
           attributes:
+            base:
+              tree_full: "В бесплатном тарифе — до %{limit} человек в дереве. Перейдите на «Семейный», чтобы добавлять без ограничений."
             avatar:
               invalid_content_type: должно быть изображением JPEG, PNG или WebP
               too_large: не должно превышать 5 МБ

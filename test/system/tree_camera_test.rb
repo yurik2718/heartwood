@@ -41,6 +41,113 @@ class TreeCameraTest < ApplicationSystemTestCase
     assert fits, "the whole tree should be visible inside the canvas on load"
   end
 
+  test "a big tree loads with far branches auto-folded" do
+    # Binary descendancy, 6 generations → 63 people, over the auto-collapse bar.
+    root  = Person.create!(given_names: "Big Root", sex: "M", tree: @tree)
+    level = [ root ]
+    5.times do |g|
+      level = level.flat_map do |parent|
+        fam = Family.create!(tree: @tree)
+        fam.partners << parent
+        Array.new(2) do |i|
+          Person.create!(given_names: "G#{g}", sex: "M", tree: @tree).tap { |c| fam.children << c }
+        end
+      end
+    end
+
+    visit person_tree_path(root, mode: "descendants", depth: 6)
+    assert_selector ".tree-edges path", wait: 5
+    assert_selector ".tree-toggle--collapsed", minimum: 1
+    # Far generations are folded away, so far fewer than 63 nodes are shown.
+    shown = page.evaluate_script(
+      "document.querySelectorAll('.tree-node:not([style*=\"display: none\"])').length")
+    assert_operator shown, :<, 40, "far branches should load folded"
+  end
+
+  test "zoom buttons change the scale around the canvas centre" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
+    assert_selector ".tree-edges path", wait: 5
+
+    scale = -> { page.evaluate_script(
+      "new DOMMatrix(getComputedStyle(document.querySelector('.tree-inner')).transform).a") }
+    before = scale.call
+    find(".tree-zoom button", text: "+").click
+    assert_in_delta before * 1.2, scale.call, 0.01
+
+    find(".tree-zoom button", text: "⌂").click
+    assert_in_delta before, scale.call, 0.05   # fit returns to the fitted scale
+  end
+
+  test "two-pointer pinch zooms the tree" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
+    assert_selector ".tree-edges path", wait: 5
+
+    # Fingers land on empty canvas (bottom-left), spread 100 → 200 px apart.
+    grew = page.evaluate_script(<<~JS)
+      (() => {
+        const canvas = document.querySelector(".tree-canvas")
+        const rect   = canvas.getBoundingClientRect()
+        const before = new DOMMatrix(getComputedStyle(document.querySelector(".tree-inner")).transform).a
+        const ev = (type, id, x, y) => new PointerEvent(type,
+          { pointerId: id, clientX: rect.left + x, clientY: rect.bottom - y, bubbles: true })
+        canvas.dispatchEvent(ev("pointerdown", 1, 20, 20))
+        canvas.dispatchEvent(ev("pointerdown", 2, 120, 20))
+        window.dispatchEvent(ev("pointermove", 2, 220, 20))
+        window.dispatchEvent(ev("pointerup", 1, 20, 20))
+        window.dispatchEvent(ev("pointerup", 2, 220, 20))
+        const after = new DOMMatrix(getComputedStyle(document.querySelector(".tree-inner")).transform).a
+        return { before, after }
+      })()
+    JS
+    assert_in_delta grew["before"] * 2, grew["after"], 0.05,
+      "doubling the finger distance should double the scale"
+  end
+
+  test "mini map appears once the tree overflows and a click jumps the camera" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 6)
+    assert_selector ".tree-edges path", wait: 5
+    assert_no_selector ".tree-minimap"   # fitted tree → no map
+
+    3.times { find(".tree-zoom button", text: "+").click }
+    assert_selector ".tree-minimap", wait: 3
+
+    moved = page.evaluate_script(<<~JS)
+      (() => {
+        const inner  = document.querySelector(".tree-inner")
+        const before = getComputedStyle(inner).transform
+        const mm     = document.querySelector(".tree-minimap")
+        const rect   = mm.getBoundingClientRect()
+        mm.dispatchEvent(new PointerEvent("pointerdown",
+          { clientX: rect.left + 4, clientY: rect.top + 4, bubbles: true }))
+        return getComputedStyle(inner).transform !== before
+      })()
+    JS
+    assert moved, "clicking the mini map should move the camera"
+  end
+
+  test "print scales the tree to page width and restores the camera after" do
+    visit person_tree_path(@chain.first, mode: "descendants", depth: 3)
+    assert_selector ".tree-edges path", wait: 5
+
+    result = page.evaluate_script(<<~JS)
+      (() => {
+        window.print = () => {}   // headless: no dialog, just the setup around it
+        const inner  = document.querySelector(".tree-inner")
+        const before = getComputedStyle(inner).transform
+        document.querySelector(".tree-print-btn").click()
+        const during = {
+          printing: document.querySelector(".tree-canvas--print") !== null,
+          origin:   new DOMMatrix(getComputedStyle(inner).transform).e === 0
+        }
+        window.dispatchEvent(new Event("afterprint"))
+        return { ...during, restored: getComputedStyle(inner).transform === before }
+      })()
+    JS
+    assert result["printing"], "print mode class should be set"
+    assert result["origin"],   "tree should be moved to the page origin for print"
+    assert result["restored"], "camera should be restored after printing"
+  end
+
   test "wheel zoom keeps the point under the cursor fixed" do
     visit person_tree_path(@chain.first, mode: "descendants", depth: 2)
     assert_selector ".tree-edges path", wait: 5

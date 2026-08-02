@@ -3,6 +3,7 @@
 class EventsController < ApplicationController
   before_action :set_person
   before_action :set_event, only: %i[edit update destroy]
+  before_action :require_can_edit, only: %i[new create edit update destroy]
 
   def new
     @event = @person.events.new(kind: params[:kind])

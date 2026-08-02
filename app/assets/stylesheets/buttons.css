@@ -1,0 +1,67 @@
+/*
+ * .btn — canonical pill button. Default is a neutral white/bordered pill;
+ * .btn--reversed (black) is how primary/emphasis actions are marked instead of
+ * tinting the button with the brand color — the accent stays reserved for
+ * links/selection (see colors.css).
+ */
+:root {
+  --btn-size: 2.65em;
+}
+
+.btn {
+  align-items: center;
+  background-color: var(--btn-background, var(--color-text-reversed));
+  border-radius: var(--btn-border-radius, 2em);
+  border: var(--btn-border-size, 1px) solid var(--btn-border-color, var(--color-border-darker));
+  color: var(--btn-color, var(--color-text));
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 600;
+  gap: 0.5em;
+  justify-content: center;
+  padding: var(--btn-padding, 0.5em 1.1em);
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn--circle {
+  --btn-border-radius: 50%;
+  --btn-padding: 0;
+
+  aspect-ratio: 1;
+  block-size: var(--btn-size);
+  display: grid;
+  inline-size: var(--btn-size);
+  place-items: center;
+}
+
+.btn--reversed {
+  --btn-background: var(--color-text);
+  --btn-color: var(--color-text-reversed);
+  --btn-border-color: transparent;
+}
+
+.btn--negative {
+  --btn-background: var(--color-negative);
+  --btn-color: var(--color-text-reversed);
+  --btn-border-color: transparent;
+}
+
+.btn--plain {
+  --btn-background: transparent;
+  --btn-border-color: transparent;
+  --btn-padding: 0;
+}
+
+.btn--borderless {
+  --btn-border-color: transparent;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  filter: grayscale(100%) contrast(0.5);
+  opacity: 0.5;
+  pointer-events: none;
+}

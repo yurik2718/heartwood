@@ -13,9 +13,13 @@
       <h1><%= @person.display_name %></h1>
     </div>
     <div class="actions">
-      <%= link_to t("people.tree"), person_tree_path(@person), class: "button button--outline" %>
-      <%= link_to t("people.edit_button"), edit_person_path(@person), class: "button" %>
-      <%= link_to t("nav.all_people"), people_path, class: "linkish" %>
+      <%= link_to t("people.tree"), person_tree_path(@person), class: "btn" %>
+      <% if can_edit? %>
+        <%= link_to edit_person_path(@person), class: "btn btn--reversed" do %>
+          <%= icon_tag "pencil" %> <%= t("people.edit_button") %>
+        <% end %>
+      <% end %>
+      <%= link_to t("nav.all_people"), people_path, class: "btn btn--plain" %>
     </div>
   </header>
 
@@ -35,7 +39,7 @@
     <h2><%= t("relationships.section_title") %></h2>
     <p class="muted relationship-lede"><%= t("relationships.lede", name: @person.display_name) %></p>
     <%= turbo_frame_tag "relationship" do %>
-      <%= link_to t("relationships.cta"), person_relationship_path(@person), class: "button button--outline" %>
+      <%= link_to t("relationships.cta"), person_relationship_path(@person), class: "btn" %>
     <% end %>
   </section>
 </article>

@@ -1,0 +1,57 @@
+<%# Compact card for the tree's slide-over panel. Rendered into the "person-panel"
+    turbo-frame; target: _top so its links navigate the whole page. %>
+<%= turbo_frame_tag "person-panel", target: "_top" do %>
+  <article class="person-panel">
+    <header class="person-panel-head person-panel-head--<%= @person.sex&.downcase || "u" %>">
+      <button type="button" class="person-panel-close"
+              data-action="drawer#close"
+              aria-label="<%= t("trees.close_panel") %>">&times;</button>
+      <% if @person.avatar.attached? %>
+        <%= image_tag @person.avatar, class: "person-panel-avatar", alt: @person.display_name %>
+      <% else %>
+        <span class="person-panel-avatar person-panel-avatar--silhouette" aria-hidden="true"><%= render "people/silhouette", sex: @person.sex %></span>
+      <% end %>
+      <h2 class="person-panel-name"><%= @person.display_name %></h2>
+      <% if @person.life_years %>
+        <p class="person-panel-years"><%= @person.life_years %></p>
+      <% end %>
+    </header>
+
+    <div class="person-panel-actions">
+      <%= link_to t("people.tree"), person_tree_path(@person), class: "btn btn--reversed" %>
+      <%= link_to t("people.profile"), person_path(@person), class: "btn" %>
+      <% if can_edit? %>
+        <%= link_to edit_person_path(@person), class: "btn" do %>
+          <%= icon_tag "pencil" %> <%= t("people.edit_button") %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%# Add a relative without leaving the tree: the form loads into this same
+        panel; return_to keeps the round-trip anchored to the tree page. %>
+    <% if can_edit? %>
+      <div class="person-panel-add">
+        <span class="person-panel-add-label"><%= t("trees.add_relative") %>:</span>
+        <% %w[parent partner child].each do |relation| %>
+          <%= link_to t("family.relation_singular.#{relation}"),
+                new_person_relative_path(@person, relation: relation, return_to: params[:return_to]),
+                class: "btn btn--plain", data: { turbo_frame: "person-panel" } %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% vitals = [ @person.birth, @person.death ].compact %>
+    <% if vitals.any? %>
+      <dl class="person-panel-fields">
+        <% vitals.each do |event| %>
+          <% details = [ event.summary, event.place_name ].compact_blank %>
+          <% next if details.empty? %>
+          <div class="person-panel-field">
+            <dt><%= event.kind_label %></dt>
+            <dd><%= details.join(" · ") %></dd>
+          </div>
+        <% end %>
+      </dl>
+    <% end %>
+  </article>
+<% end %>

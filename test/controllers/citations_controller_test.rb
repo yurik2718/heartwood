@@ -25,6 +25,28 @@ class CitationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, @event.reload.citations.count
   end
 
+  test "POST create stores source author, repository, and source_type" do
+    post person_event_citations_url(@person, @event),
+         params: { source: { title: "1881 Census", author: "GRO", repository: "TNA", source_type: "census" } }
+    source = Source.find_by!(title: "1881 Census")
+    assert_equal "GRO", source.author
+    assert_equal "TNA", source.repository
+    assert_equal "census", source.source_type
+  end
+
+  test "POST create stores citation page, quoted text, date, and confidence" do
+    post person_event_citations_url(@person, @event),
+         params: {
+           source: { title: "Parish register" },
+           citation: { page: "p. 42", text: "born the third of March", date: "1881-04-03", confidence: "very_high" }
+         }
+    citation = @event.reload.citations.last
+    assert_equal "p. 42", citation.page
+    assert_equal "born the third of March", citation.text
+    assert_equal Date.new(1881, 4, 3), citation.date
+    assert citation.very_high?
+  end
+
   test "POST create reuses an existing source with the same title" do
     existing = Source.create!(title: "Parish register", tree: @tree)
     assert_no_difference "Source.count" do
@@ -58,5 +80,25 @@ class CitationsControllerTest < ActionDispatch::IntegrationTest
     post person_event_citations_url(other_person, other_event),
          params: { source: { title: "Stolen record" } }
     assert_response :not_found
+  end
+
+  test "a viewer cannot add or remove citations" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "Citation.count" do
+      post person_event_citations_url(@person, @event), params: { source: { title: "Parish register" } }
+    end
+    assert_redirected_to root_url
+
+    source   = Source.create!(title: "Vital record", tree: @tree)
+    citation = Citation.create!(source: source, citable: @event)
+    assert_no_difference "Citation.count" do
+      delete person_event_citation_url(@person, @event, citation)
+    end
+    assert_redirected_to root_url
   end
 end

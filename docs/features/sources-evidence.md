@@ -15,7 +15,9 @@ Every fact is a **claim** that should point to **evidence**. The UI makes this n
 a chore:
 - Attach a [[source-citation]] to any [[event]] or name while editing.
 - See, on the [[person-profile]], which facts are well-sourced vs unsupported (a subtle
-  confidence indicator).
+  confidence indicator): the event's small `.sourced-badge` reflects the *highest*
+  [[source-citation|confidence level]] among its citations — still one small badge, not new
+  chrome, per the "grandparent-simple, genealogist-deep" rule in [[positioning]].
 - When two sources disagree (two birth dates), show both and let the user mark the preferred —
   never silently overwrite. See [[event]].
 

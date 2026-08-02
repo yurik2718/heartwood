@@ -2,6 +2,7 @@
 # dismiss here, merge later (v2). We only ever suggest. See DuplicateFinder.
 class HintsController < ApplicationController
   before_action :set_hint, only: :dismiss
+  before_action :require_can_edit, only: %i[scan dismiss]
 
   def index
     @hints = Current.tree.duplicate_hints.pending

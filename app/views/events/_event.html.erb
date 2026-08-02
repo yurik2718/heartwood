@@ -5,11 +5,16 @@
     <% if event.place %>
       <span class="event-place">· <%= event.place.name %></span>
     <% end %>
-    <% if event.citations.loaded? ? event.citations.any? : event.citations.exists? %>
-      <span class="sourced-badge" title="<%= t("citations.sourced_title") %>"><%= t("citations.sourced_badge") %></span>
+    <% if (best = event.best_citation_confidence) %>
+      <span class="sourced-badge sourced-badge--<%= best %>"
+            title="<%= t("citations.sourced_title") %> · <%= t("citations.confidence.#{best}") %>">
+        <%= icon_tag "check" %>
+      </span>
     <% end %>
     <span class="event-actions">
-      <%= link_to t("events.edit"), edit_person_event_path(person, event), class: "linkish" %>
+      <%= link_to edit_person_event_path(person, event), class: "btn btn--plain" do %>
+        <%= icon_tag "pencil" %> <%= t("events.edit") %>
+      <% end %>
       <%= render "shared/delete_button", url: person_event_path(person, event),
             label: t("events.remove"), confirm: t("events.remove_confirm") %>
     </span>

@@ -13,7 +13,23 @@
             <% else %>
               <%= citation.source.title %>
             <% end %>
+            <span class="confidence-badge confidence-badge--<%= citation.confidence %>" title="<%= t("citations.confidence_label") %>">
+              <%= citation.confidence_label %>
+            </span>
           </p>
+          <% if citation.source.author.present? || citation.source.repository.present? %>
+            <p class="source-meta muted">
+              <%= [ citation.source.author, citation.source.repository ].select(&:present?).join(" · ") %>
+            </p>
+          <% end %>
+          <% if citation.page.present? || citation.date.present? %>
+            <p class="source-meta muted">
+              <%= [ citation.page, citation.date&.iso8601 ].select(&:present?).join(" · ") %>
+            </p>
+          <% end %>
+          <% if citation.text.present? %>
+            <blockquote class="source-quote"><%= citation.text %></blockquote>
+          <% end %>
           <% if citation.source.citation_text.present? %>
             <p class="source-citation-text muted"><%= citation.source.citation_text %></p>
           <% end %>

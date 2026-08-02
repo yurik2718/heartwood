@@ -1,37 +1,14 @@
 /*
  * Heartwood — vanilla CSS (no framework). Modern CSS: custom properties + nesting.
  * Keep it calm, warm, and readable — see docs/vision.md.
+ *
+ * Design tokens live in colors.css; the shared reset/typography/interaction
+ * primitives (.btn, .input, .avatar, icons) live in their own files — see
+ * docs/references/prior-art.md for the once-campfire/writebook/fizzy pattern
+ * this follows. What's left here is page-specific styling not yet migrated:
+ * tree canvas + drawer, auth-screen chrome, relationship calc, place
+ * autocomplete, maps, hints, sources, events, search, profile tabs.
  */
-
-:root {
-  --bg: #faf8f5;
-  --surface: #ffffff;
-  --ink: #2c2622;
-  --muted: #8a807a;
-  --line: #e7e1da;
-  --accent: #6b8f5e;       /* heartwood green */
-  --accent-ink: #3f5a36;
-  --accent-wash: #eef3e9;  /* tint for selected/active accent surfaces */
-  --tree-edge: #b3a695;    /* tree connector lines — must stay visible on --bg */
-  --danger: #b4533f;
-  --danger-wash: #fbf3f1;
-  --danger-line: #e6c9c2;
-  --radius: 10px;
-  --maxw: 60rem;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  line-height: 1.55;
-}
-
-a { color: var(--accent-ink); text-decoration: none; }
-a:hover { text-decoration: underline; }
 
 .site-header {
   display: flex;
@@ -76,7 +53,60 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 1px 2px rgba(0,0,0,.08);
 }
 
-main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
+/* Tree switcher — a plain <details> disclosure, only rendered when a user
+   belongs to more than one tree (see [[collaboration]]). */
+.tree-switcher {
+  position: relative;
+
+  summary { list-style: none; cursor: pointer; }
+  summary::-webkit-details-marker { display: none; }
+}
+
+.tree-switcher__menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.5rem;
+  min-width: 12rem;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+
+  li { margin: 0; }
+  .btn { width: 100%; justify-content: flex-start; }
+}
+
+/* `width: 100%` matters here, not just cosmetic: `main` is a flex item of `body`
+   (below), and an *auto*-valued cross-size on a flex item with auto side margins
+   shrinks-to-fit its content's own preferred width instead of stretching — for
+   text-heavy pages that happens to look right anyway (paragraphs/nav rows are
+   "wide" enough on their own), but a near-empty page (e.g. the map, before the
+   `:has()` rule below even applies) collapses to a sliver. An explicit width
+   sidesteps the shrink-to-fit path entirely, so this can't silently break again. */
+main { width: 100%; max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; flex: 1; min-height: 0; }
+
+/* The tree/map canvases are graphs and maps, not prose — they benefit from the
+   full viewport width and height instead of the readable-text max-width / fixed
+   vh every other page uses. `main` becomes the flex-filling ancestor only on
+   these pages; `.tree-page`/`.map-page` and their canvas (below) pass that fill
+   down to the canvas itself. */
+main:has(.tree-page, .map-page) {
+  max-width: none;
+  /* Auto side margins make a column-flex item shrink-to-fit instead of stretching
+     (auto margins win over the default stretch alignment) — drop them now that
+     there's no max-width left to center within. */
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 
 .page-head {
   display: flex;
@@ -86,6 +116,16 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   margin-bottom: 1.25rem;
 
   h1 { margin: 0; font-size: 1.6rem; }
+}
+
+/* Invite box on the members page — join-link field + copy/regenerate. */
+.invite-box {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  .input--actor { flex: 1; }
 }
 
 .flash {
@@ -98,21 +138,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   color: var(--accent-ink);
 }
 .flash--alert { background: #f7e7e3; border-color: var(--danger); color: var(--danger); }
-
-/* Buttons & links */
-.button, button, input[type="submit"] {
-  display: inline-block;
-  padding: 0.45rem 0.9rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font: inherit;
-  cursor: pointer;
-}
-.button:hover, button:hover { background: var(--accent-ink); text-decoration: none; }
-.linkish { background: none; color: var(--accent-ink); padding: 0.45rem 0.5rem; border: none; cursor: pointer; }
-.danger { background: var(--danger); margin-top: 1.5rem; }
 
 /* Unified destructive affordance: subtle inline delete link (events, sources, …) */
 .delete-link {
@@ -135,46 +160,31 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 .danger-zone h2 { margin: 0 0 0.25rem; font-size: 1rem; color: var(--danger); }
 .danger-zone p { margin: 0 0 0.75rem; font-size: 0.9rem; }
-.danger-zone .danger { margin-top: 0; }
 
-/* Avatars */
-.avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
-  object-fit: cover;
-}
-.avatar--thumb  { width: 32px;  height: 32px;  font-size: 0.65rem; }
-.avatar--medium { width: 72px;  height: 72px;  font-size: 1.2rem; }
-.avatar--large  { width: 96px;  height: 96px;  font-size: 1.6rem; }
-.avatar--gallery { width: 200px; height: 200px; border-radius: var(--radius); font-size: 2.5rem; }
-.avatar--initials { letter-spacing: 0.02em; }
-.avatar-preview { margin: 0.5rem 0; }
+/* .avatar itself lives in avatars.css now — still used here: */
 .field-hint { font-size: 0.8rem; color: var(--muted); }
 .profile-identity { display: flex; align-items: center; gap: 1rem; }
 
-/* People list */
+/* People list — canonical member-row shape: avatar, name, flexible separator
+   pushing trailing meta to the edge (see once-campfire/writebook member rows). */
 .people-list { list-style: none; padding: 0; margin: 0; }
 .person-row {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.55rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.6rem 0.25rem;
 
   a { font-weight: 600; font-size: 1.05rem; }
-  .years { color: var(--muted); font-size: 0.9rem; }
+  .years { color: var(--color-muted); font-size: 0.9rem; white-space: nowrap; }
 }
-.person-row__identity { display: flex; align-items: center; gap: 0.6rem; }
+.person-row:last-child { border-bottom: none; }
+.person-row .separator {
+  border: none;
+  border-top: 1px dotted var(--color-border-darker);
+  flex: 1;
+  margin: 0;
+}
 .empty { color: var(--muted); }
 
 /* Person show */
@@ -205,15 +215,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 .relative-picker .inline-title { margin: 0 0 0.5rem; font-weight: 600; text-transform: capitalize; }
 .relative-picker .form--inline { margin-top: 0; padding: 0; border: none; background: none; }
-
-.combobox input[type="search"] {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font: inherit;
-  background: #fff;
-}
 
 .combobox-options { list-style: none; margin: 0.4rem 0 0; padding: 0; }
 .combobox-options li { margin: 0; }
@@ -260,8 +261,9 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .event-kind { font-weight: 600; min-width: 7rem; }
 .event-summary { color: var(--ink); flex: 1; }
 .event-actions { display: flex; gap: 0.25rem; }
-.event-actions .linkish { padding: 0 0.4rem; font-size: 0.85rem; }
 .sourced-badge { font-size: 0.75rem; color: var(--accent-ink); font-weight: 700; margin-left: 0.2rem; }
+.sourced-badge--very_low, .sourced-badge--low { opacity: 0.55; }
+.sourced-badge--normal { opacity: 0.8; }
 .citation-add { font-size: 0.8rem; color: var(--muted); padding: 0 0 0.25rem; display: inline-block; }
 .citation-add:hover { color: var(--accent-ink); }
 
@@ -277,10 +279,20 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .source-event-label:first-child { margin-top: 0; }
 .source-item { margin: 0 0 0.5rem 0; padding: 0.75rem; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--line); }
 .source-title { margin: 0 0 0.25rem; font-weight: 600; }
+.source-meta { margin: 0.1rem 0; font-size: 0.85rem; }
+.source-quote { margin: 0.3rem 0; padding-left: 0.6rem; border-left: 2px solid var(--line); font-size: 0.9rem; font-style: italic; }
 .source-citation-text { margin: 0.2rem 0; font-size: 0.9rem; }
+.confidence-badge { font-size: 0.72rem; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.4rem; }
+.confidence-badge--high, .confidence-badge--very_high { color: var(--accent-ink); border-color: var(--accent); }
 .memories-gallery { display: flex; gap: 1rem; flex-wrap: wrap; }
 
 /* Search */
+/* Search inputs: an inset icon wherever a field means "look something up" —
+   the people list, the relationship calculator, the tree canvas. */
+.search-field { position: relative; display: flex; align-items: center; }
+.search-field .icon--search { position: absolute; left: 0.6rem; color: var(--muted); }
+.search-field input { padding-left: 1.9rem; width: 100%; }
+
 .search-form { margin-bottom: 1rem; }
 .search-bar {
   display: flex;
@@ -288,10 +300,10 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   align-items: center;
   flex-wrap: wrap;
 
+  .search-field { flex: 1; min-width: 12rem; }
+
   input[type="search"] {
-    flex: 1;
-    min-width: 12rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem 0.5rem 1.9rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     font: inherit;
@@ -340,22 +352,8 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .tab-stub { padding: 1.5rem 0; font-style: italic; }
 
 /* Tree view */
-.tree-page { container-type: inline-size; }
+.tree-page { container-type: inline-size; display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .tree-hint { color: var(--muted); font-size: 0.8rem; margin: -0.5rem 0 0.75rem; }
-
-.button--outline {
-  background: transparent;
-  color: var(--accent-ink);
-  border: 1px solid var(--accent);
-}
-.button--outline:hover { background: #eaf2e6; text-decoration: none; }
-
-.button--secondary {
-  background: var(--surface);
-  color: var(--accent-ink);
-  border: 1px solid var(--line);
-}
-.button--secondary:hover { background: var(--bg); text-decoration: none; }
 
 .page-head-actions { display: flex; gap: 0.5rem; align-items: center; }
 
@@ -363,7 +361,7 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   position: relative;
   overflow: hidden;
   width: 100%;
-  height: 70vh;
+  flex: 1;
   min-height: 400px;
   background: var(--bg);
   border: 1px solid var(--line);
@@ -396,27 +394,32 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 }
 
 /* Marriage bond between the two cards of a couple — thicker than descent edges. */
-.tree-edge--bond { stroke-width: 3; }
+.tree-edge--bond { stroke-width: 2.5; }
+
+/* ♥ between the partner cards, on a surface-coloured disc that breaks the bond line. */
+.tree-heart-bg { fill: var(--surface); stroke: var(--tree-edge); stroke-width: 1.5; }
+.tree-heart {
+  fill: #b87ca0;
+  font-size: 12px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
 
 .tree-nodes-layer { position: relative; }
 
+/* Nodes come in two shapes (sizes stay in sync with tree_controller.js): couple
+   members are banded cards (CARD_W × CARD_H), singles are circles (CIRC_D). */
 .tree-node {
   position: absolute;
   top: 0;
   left: 0;
-  width: 210px;   /* keep in sync with NODE_W in tree_controller.js */
-  height: 88px;   /* keep in sync with NODE_H — fits a wrapped name + dates */
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
 
   a {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    display: block;
     color: inherit;
     height: 100%;
 
@@ -424,42 +427,135 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   }
 }
 
-/* Avatar inside a tree node — photo or initials fallback. */
+.tree-node--card {
+  width: 210px;    /* CARD_W */
+  height: 100px;   /* CARD_H */
+  border-radius: 10px;
+}
+
+/* Coloured band across the card top — surname now, kinship label later. */
+.node-band {
+  display: block;
+  height: 22px;
+  line-height: 22px;
+  padding: 0 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  background: var(--line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-body {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: calc(100% - 22px);
+  padding: 0 0.75rem;
+}
+
+.tree-node--circle {
+  width: 160px;    /* CIRC_D */
+  height: 160px;
+  border-radius: 50%;
+  border-width: 2px;
+  text-align: center;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0 1rem;
+  }
+}
+
+/* Avatar inside a tree node — photo, or an outline silhouette tinted by sex. */
 .node-avatar {
   flex: 0 0 auto;
-  width: 2rem;
-  height: 2rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   object-fit: cover;
 }
-.node-avatar--initials {
+.tree-node--circle .node-avatar { width: 2.5rem; height: 2.5rem; }
+.node-avatar--silhouette {
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg);
   color: var(--muted);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
 }
+.node-avatar--silhouette svg { width: 72%; height: 72%; }
+.tree-node--m .node-avatar--silhouette { color: #6b9fb8; }
+.tree-node--f .node-avatar--silhouette { color: #b87ca0; }
 .node-text { min-width: 0; }
 
-.tree-node--focus {
+/* Sex tones: the card band and the circle ring pick up the colour. */
+.tree-node--m.tree-node--card .node-band { background: #6b9fb8; }
+.tree-node--f.tree-node--card .node-band { background: #b87ca0; }
+.tree-node--m.tree-node--circle { border-color: #6b9fb8; }
+.tree-node--f.tree-node--circle { border-color: #b87ca0; }
+.tree-node--living { background: var(--bg); }
+
+/* After the sex tones so the accent ring wins on the focus node. */
+.tree-node.tree-node--focus {
   border-color: var(--accent);
   border-width: 2px;
+  box-shadow: 0 0 0 3px var(--accent-wash);
 }
 
-.tree-node--m { border-left: 3px solid #6b9fb8; }
-.tree-node--f { border-left: 3px solid #b87ca0; }
-.tree-node--living { border-left: 3px solid var(--line); background: var(--bg); }
+/* Ghost add-relative slots — dashed invitations at the tree's growth frontier. */
+.tree-node--ghost {
+  border-style: dashed;
+  border-color: var(--tree-edge);
+  background: transparent;
+  box-shadow: none;
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--muted);
+    padding: 0 0.75rem;
+
+    &:hover { background: transparent; color: var(--accent-ink); }
+  }
+}
+.tree-node--ghost.tree-node--circle a { flex-direction: column; gap: 0.35rem; }
+.tree-node--ghost:hover { border-color: var(--accent); }
+.ghost-icon svg { display: block; width: 2.4rem; height: 2.4rem; }
+.ghost-label { font-size: 0.78rem; font-weight: 600; text-align: center; }
+
 .node-name--living {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 100%;
   color: var(--muted);
   font-style: italic;
   padding: 0.5rem 0.75rem;
   margin: 0;
+  text-align: center;
+}
+
+/* Circles clip text with their round outline, so let the surname wrap instead
+   of ellipsis-clipping (the card band keeps single-line ellipsis), and give the
+   given names a smaller size + a third line — patronymics are long. */
+.tree-node--circle .node-name,
+.tree-node--circle .node-surname { font-size: 0.8rem; }
+.tree-node--circle .node-name { -webkit-line-clamp: 3; }
+.tree-node--circle .node-surname {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
 }
 
 /* Depth controls */
@@ -474,15 +570,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--ink);
-}
-.button--icon {
-  padding: 0.45rem 0.65rem;
-  line-height: 1;
-}
-.button--disabled {
-  opacity: 0.35;
-  cursor: default;
-  pointer-events: none;
 }
 
 .node-name,
@@ -572,14 +659,26 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   overflow: auto;
 }
 .tree-search-results li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
   padding: 0.35rem 0.5rem;
   border-radius: 6px;
   font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
+.tree-search-results li span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.tree-search-years { flex: 0 0 auto; color: var(--muted); font-size: 0.75rem; }
+
+/* Live search: non-matching people fade back so matches pop on the canvas. */
+.tree-node--dim { opacity: 0.25; transition: opacity 0.2s ease; }
+
+/* Keyboard navigation: the walked node, and a visible focus ring on the canvas. */
+.tree-node--kb { outline: 2px dashed var(--accent); outline-offset: 3px; }
+.tree-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tree-search-results li:hover,
 .tree-search-results li:focus { background: var(--accent-wash); outline: none; }
 
@@ -589,6 +688,173 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   0%, 100% { box-shadow: 0 1px 3px rgba(0,0,0,.06); }
   25%, 60% { box-shadow: 0 0 0 3px var(--accent); }
 }
+
+/* Mini map — thumbnail with a viewport rectangle, only while the tree overflows. */
+.tree-minimap {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 3;
+  width: 11rem;
+  height: 8rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  opacity: 0.95;
+  cursor: pointer;
+}
+.tree-minimap--hidden { display: none; }
+
+/* Print: only the tree itself, scaled to the page width (tree#print sets the
+   camera and --print-h before calling window.print). */
+@media print {
+  .site-header,
+  .page-head .actions,
+  .tree-hint,
+  .tree-search,
+  .tree-zoom,
+  .tree-minimap,
+  .tree-toggles,
+  .tree-drawer { display: none !important; }
+
+  .tree-canvas {
+    overflow: visible;
+    border: none;
+    min-height: 0;
+  }
+  .tree-canvas--print { height: var(--print-h, auto); }
+}
+
+/* Zoom buttons — bottom-right of the canvas, under the fingers on touch. */
+.tree-zoom {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.tree-zoom button {
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;   /* the global button padding would squeeze the svg icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--accent-ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.tree-zoom button:hover { background: var(--accent-wash); border-color: var(--accent); }
+.tree-zoom button svg { width: 1.05rem; height: 1.05rem; }
+
+/* Slide-over person panel — opens over the canvas when a node is clicked
+   (drawer_controller.js + people/panel.html.erb). */
+.tree-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(21rem, 92%);
+  z-index: 4;
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  box-shadow: -10px 0 28px rgba(0,0,0,.12);
+  transform: translateX(105%);
+  transition: transform 0.28s ease;
+  overflow-y: auto;
+  cursor: default;
+  user-select: text;
+}
+.tree-drawer--open { transform: none; }
+
+.person-panel-head {
+  position: relative;
+  padding: 1.5rem 1rem 1.25rem;
+  text-align: center;
+  color: #fff;
+  background: var(--line);
+}
+.person-panel-head--m { background: #6b9fb8; }
+.person-panel-head--f { background: #b87ca0; }
+
+.person-panel-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.85;
+}
+.person-panel-close:hover { opacity: 1; }
+
+.person-panel-avatar {
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.85);
+  margin: 0 auto 0.75rem;
+}
+.person-panel-avatar--silhouette {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: var(--muted);
+}
+.person-panel-avatar--silhouette svg { width: 64%; height: 64%; }
+.person-panel-head--m .person-panel-avatar--silhouette { color: #6b9fb8; }
+.person-panel-head--f .person-panel-avatar--silhouette { color: #b87ca0; }
+
+.person-panel-name  { margin: 0; font-size: 1.15rem; }
+.person-panel-years { margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+.person-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.person-panel-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.person-panel-add-label { color: var(--muted); }
+
+/* The add-relative picker rendered inside the tree drawer. */
+.tree-drawer .relative-picker { padding: 1rem; }
+.relative-picker-for { margin: -0.25rem 0 0.75rem; font-size: 0.85rem; }
+
+.person-panel-fields { margin: 0; padding: 1rem; display: grid; gap: 0.9rem; }
+.person-panel-field dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+.person-panel-field dd { margin: 0; font-size: 0.9rem; }
 
 /* Auth screens (sign up / sign in / password) — calm, centered card à la fizzy */
 .auth-wrap { display: grid; justify-content: center; margin-top: 2.5rem; }
@@ -603,20 +869,8 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   h1 { margin: 0 0 0.35rem; font-size: 1.6rem; font-weight: 800; }
 }
 .auth-lede { margin: 0 0 1.25rem; color: var(--muted); }
-.auth-form { display: flex; flex-direction: column; gap: 0.75rem; }
-.auth-form input[type="text"],
-.auth-form input[type="email"],
-.auth-form input[type="password"] {
-  width: 100%;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font: inherit;
-  font-size: 1rem;
-  background: #fff;
-}
-.auth-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-.auth-form .button { width: 100%; padding: 0.7rem; font-size: 1rem; text-align: center; margin-top: 0.25rem; }
+.auth-form { display: flex; flex-direction: column; gap: 0.75rem; font-size: 1rem; }
+.auth-form .btn { width: 100%; padding: 0.7rem; font-size: 1rem; margin-top: 0.25rem; }
 .auth-hint { margin: -0.35rem 0 0; color: var(--muted); font-size: 0.85rem; }
 .auth-alt { margin: 1.1rem 0 0; color: var(--muted); font-size: 0.9rem; text-align: center; }
 
@@ -624,7 +878,10 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; max-width: 32rem; }
 .field { display: flex; flex-direction: column; margin-bottom: 0.85rem;
   label { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.2rem; }
-  input, select { padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
+
+  /* :not(.input) so fields already migrated to the canonical .input primitive
+     (inputs.css) aren't double-styled by this legacy rule. */
+  input:not(:where(.input)), select:not(:where(.input)) { padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
 }
 .form .actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
 .errors { background: #f7e7e3; border: 1px solid var(--danger); color: var(--danger); border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem;
@@ -666,7 +923,6 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
 .event-place { color: var(--muted); font-size: 0.85rem; }
 .place-input-row { display: flex; gap: 0.5rem; align-items: stretch; }
 .place-input-row input[type="text"] { flex: 1; }
-.button--small { padding: 0.3rem 0.7rem; font-size: 0.85rem; white-space: nowrap; }
 .event-add-actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
 .place-candidates { display: grid; gap: 0.25rem; margin: 0.5rem 0 0; }
 .place-candidate {
@@ -697,10 +953,10 @@ main { max-width: var(--maxw); margin: 2rem auto; padding: 0 1.25rem; }
   overflow: hidden;
   background: var(--surface);
 }
-.map-canvas--full { height: 70vh; }
+.map-canvas--full { flex: 1; min-height: 400px; }
 .map-canvas--empty { background: var(--bg); }
 .map-note { margin: 0.5rem 0 0; font-size: 0.85rem; }
-.map-page { max-width: var(--maxw); margin: 1.5rem auto; padding: 0 1.25rem; }
+.map-page { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 /* Keep Leaflet controls/panes above the warm surface */
 .leaflet-container { font: inherit; }
 

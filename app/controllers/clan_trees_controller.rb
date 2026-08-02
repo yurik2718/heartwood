@@ -8,7 +8,8 @@ class ClanTreesController < ApplicationController
     return unless @root
 
     @depth   = CLAN_DEPTH
-    result   = @root.descendant_graph(depth: @depth)
+    # No add-relative ghosts on the shared clan landing — it's a viewing surface.
+    result   = @root.descendant_graph(depth: @depth, ghosts: false)
     @mode    = result[:mode]
     @graph   = result.except(:persons)
     @persons = result[:persons]

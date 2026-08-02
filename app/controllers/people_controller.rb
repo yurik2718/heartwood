@@ -3,19 +3,25 @@
 class PeopleController < ApplicationController
   TABS = %w[details sources memories timeline map].freeze
 
-  before_action :set_person, only: %i[show edit update destroy]
+  before_action :set_person, only: %i[show panel edit update destroy]
+  before_action :require_can_edit, only: %i[new create edit update destroy]
 
   def index
     @q      = params[:q].to_s.strip
     @sex    = params[:sex].to_s
+    @sort   = Person::SORT_OPTIONS.include?(params[:sort]) ? params[:sort] : Person::SORT_OPTIONS.first
     @people = Current.tree.people
                      .search(@q, user: Current.user)
                      .then { |r| Person::SEXES.include?(@sex) ? r.where(sex: @sex) : r }
-                     .order(:surname, :given_names)
+                     .sorted(@sort)
   end
 
   def show
     @tab = TABS.include?(params[:tab]) ? params[:tab] : "details"
+  end
+
+  # Compact person card for the tree's slide-over panel (loaded into a turbo-frame).
+  def panel
   end
 
   def new

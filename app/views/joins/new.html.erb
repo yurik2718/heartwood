@@ -1,0 +1,10 @@
+<% content_for :title, t("joins.title", tree: @tree.name) %>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1><%= t("joins.heading", tree: @tree.name) %></h1>
+    <p class="auth-lede"><%= t("joins.lede") %></p>
+
+    <%= button_to t("joins.submit"), join_path(@tree.join_code), class: "btn btn--reversed" %>
+  </div>
+</div>

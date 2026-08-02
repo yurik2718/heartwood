@@ -16,8 +16,8 @@
 
   <div class="hint-actions">
     <%# Merge is a deliberate v2 step — suggest, never one-click-accept. %>
-    <span class="button button--outline button--disabled" aria-disabled="true"
+    <span class="btn" aria-disabled="true"
           title="<%= t("hints.merge_soon") %>"><%= t("hints.merge") %></span>
-    <%= button_to t("hints.dismiss"), dismiss_hint_path(hint), method: :patch, class: "linkish" %>
+    <%= button_to t("hints.dismiss"), dismiss_hint_path(hint), method: :patch, class: "btn btn--plain" %>
   </div>
 <% end %>

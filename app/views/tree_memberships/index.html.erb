@@ -1,0 +1,56 @@
+<% content_for :title, t("tree_memberships.title") %>
+
+<div class="page-head">
+  <h1><%= t("tree_memberships.title") %></h1>
+</div>
+
+<% if Current.membership.owner? %>
+  <section class="invite-box">
+    <label class="input--actor">
+      <input type="text" class="input" value="<%= join_url(Current.tree.join_code) %>"
+             readonly data-clipboard-target="source">
+      <button type="button" class="btn btn--circle" data-controller="clipboard"
+              data-action="clipboard#copy" title="<%= t("tree_memberships.copy_link") %>">
+        <%= icon_tag "copy-paste" %>
+      </button>
+    </label>
+    <%= button_to tree_join_code_path, class: "btn btn--circle",
+          title: t("tree_memberships.reset_link"),
+          data: { turbo_confirm: t("tree_memberships.reset_confirm") } do %>
+      <%= icon_tag "refresh" %>
+    <% end %>
+  </section>
+<% end %>
+
+<ul class="people-list">
+  <% @memberships.each do |membership| %>
+    <li class="person-row">
+      <div class="avatar avatar--thumb avatar--initials" aria-hidden="true">
+        <%= membership.user.name.split.map(&:first).first(2).join.upcase %>
+      </div>
+      <span><%= membership.user.name %></span>
+      <hr class="separator" aria-hidden="true">
+
+      <% if membership.owner? %>
+        <span class="years"><%= icon_tag "crown" %> <%= t("tree_memberships.roles.owner") %></span>
+      <% else %>
+        <span class="years"><%= t("tree_memberships.roles.#{membership.role}") %></span>
+
+        <% if Current.membership.owner? %>
+          <%= button_to tree_membership_path(membership), method: :patch,
+                params: { tree_membership: { role: membership.editor? ? "viewer" : "editor" } },
+                class: "btn btn--circle #{"btn--reversed" if membership.editor?}",
+                title: t("tree_memberships.role_toggle_title") do %>
+            <%= icon_tag "crown" %>
+          <% end %>
+          <%= button_to tree_membership_path(membership), method: :delete,
+                class: "btn btn--circle btn--negative",
+                title: t("tree_memberships.remove"),
+                data: { turbo_confirm: t("tree_memberships.remove_confirm", name: membership.user.name) } do %>
+            <%= icon_tag "minus" %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

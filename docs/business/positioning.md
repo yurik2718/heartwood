@@ -16,13 +16,20 @@ doesn't serve this positioning, cut it.
 it forever under AGPL, or let us host it. A FamilySearch-grade interface on a
 webtrees-grade openness.
 
+Said the other way, to the audience that already knows the reference point: **Heartwood is
+what Gramps would be if it were built cloud-first** — the same evidence-first domain depth
+(sources, citations, events), but multiple relatives editing one tree together from a
+browser instead of one person's local `.gramps` file. Gramps stays the right tool for deep
+local/offline power-work — see the [[gedcom|Gramps round-trip]] — Heartwood is the cloud
+half of that pairing, not a replacement for it.
+
 ## The market has three camps — we only fight one
 
 | Camp | Examples | Their moat | Our stance |
 |---|---|---|---|
 | **Record-data SaaS** | Ancestry, MyHeritage, FamilySearch, Findmypast | Billions of digitized records, DNA databases, hints against archives | **Don't compete.** This is a *data* moat, unbeatable with code. We interoperate (GEDCOM), we don't out-archive them. |
 | **Self-hosted OSS** | webtrees, Gramps Web, PhpGedView, GeneWeb | Free, open, private, collaborative | **This is our fight.** We win on UX and modern stack. |
-| **Desktop** | Heredis, MacFamilyTree, Gramps | Power, offline | Adjacent; desktop is declining. We offer the web/managed alternative. |
+| **Desktop** | Heredis, MacFamilyTree, Gramps | Power, offline | Adjacent, not competing — we're explicitly positioned as **Gramps' cloud/collaborative counterpart**, interoperating via the [[gedcom|Gramps round-trip]] rather than trying to out-power it locally. |
 
 **The unoccupied corner we own:** *"webtrees that doesn't look and feel like webtrees."*
 The open-source genealogy tools are powerful but dated (PHP-era UIs, engineering-grade
@@ -51,6 +58,10 @@ That need is served by the record-data SaaS's data, not by software — and we s
    See [[open-core]], [[pricing-hosting]].
 4. **Privacy-first from the schema up.** Living people hidden by default, granular
    controls — a standout that OSS users prize and closed SaaS do grudgingly.
+5. **Global by construction, not afterthought.** Shipping bilingual (English + Russian) from
+   the first release, on generic Rails I18n rather than one hardcoded locale, is what makes
+   "popular open-source family-tree app worldwide" ([[vision]]) a realistic goal instead of
+   a slogan. Every user-facing string goes through `t()` — see `config/locales/`.
 
 ## UX is the product — the intuitiveness commitment
 

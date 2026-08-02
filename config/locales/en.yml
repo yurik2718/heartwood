@@ -2,6 +2,36 @@ en:
   nav:
     sign_out: Sign out
     all_people: All people
+    members: Members
+
+  active_tree:
+    flash:
+      not_a_member: You're not a member of that tree.
+
+  joins:
+    title: "Join %{tree}"
+    heading: "You've been invited to %{tree}"
+    lede: Join to view and add family members together.
+    submit: Join this tree
+    flash:
+      already_member: "You're already a member of %{tree}."
+      joined: "Welcome to %{tree}!"
+
+  tree_memberships:
+    title: Members
+    copy_link: Copy invite link
+    reset_link: Generate a new link
+    reset_confirm: This will invalidate the current invite link. Continue?
+    role_toggle_title: Toggle editor/viewer
+    remove: Remove
+    remove_confirm: "Remove %{name} from this tree?"
+    roles:
+      owner: Owner
+      editor: Editor
+      viewer: Viewer
+    flash:
+      code_reset: Invite link regenerated. The old link no longer works.
+
   locale:
     en: EN
     ru: RU
@@ -48,6 +78,12 @@ en:
     search_clear: Clear
     sex_filter_all: All sexes
     sex_label: Sex
+    sort:
+      surname_asc: Name (A–Z)
+      surname_desc: Name (Z–A)
+      birth_asc: Birth date (oldest first)
+      birth_desc: Birth date (newest first)
+      created_desc: Recently added
     status_label: Status
     nickname_label: Nickname
     status:
@@ -70,7 +106,7 @@ en:
     children: Children
     siblings: Siblings
     none: None recorded.
-    add: "+ Add %{relation}"
+    add: "Add %{relation}"
     add_title: "Add %{relation}"
     relation_singular:
       parent: parent
@@ -175,7 +211,7 @@ en:
   events:
     title: Life events
     none: No events yet.
-    add: "+ Add event"
+    add: "Add event"
     kind_label: Type
     date_label: Date
     detail_label: Detail
@@ -184,8 +220,8 @@ en:
     detail_placeholder: "e.g. Engineer (for facts)"
     place_label: Place
     place_placeholder: "e.g. Boston, Massachusetts"
-    add_birthplace: + Birthplace
-    add_residence: + Where they lived
+    add_birthplace: Birthplace
+    add_residence: Where they lived
     remove_confirm: Remove this event?
     edit: Edit
     remove: Remove
@@ -207,7 +243,7 @@ en:
       EDUC: Education
 
   citations:
-    add: + Add source
+    add: Add source
     add_title: "Add source for %{event}"
     submit_add: Save source
     sourced_badge: "✓"
@@ -217,8 +253,29 @@ en:
     none_for_person: No sources cited yet. Add a source to any life event.
     source_title_label: Title
     source_url_label: URL (optional)
+    source_author_label: Author (optional)
+    source_repository_label: Repository (optional)
+    source_type_label: Type (optional)
+    source_types:
+      census: Census
+      certificate: Certificate
+      book: Book
+      website: Website
+      oral_history: Oral history
+      other: Other
     citation_text_label: Notes (optional)
     citation_text_placeholder: "e.g. page 42, parish register"
+    page_label: Page / detail (optional)
+    text_label: Quoted text (optional)
+    text_placeholder: "e.g. “born the third of March”"
+    date_label: Citation date (optional)
+    confidence_label: Confidence
+    confidence:
+      very_low: Very low
+      low: Low
+      normal: Normal
+      high: High
+      very_high: Very high
     flash:
       created: Source added.
       destroyed: Source removed.
@@ -230,7 +287,9 @@ en:
     title: "%{name} — Family Tree"
     ancestors: Ancestors
     descendants: Descendants
-    hint: "Scroll to zoom · drag to pan · click a node to refocus"
+    hint: "Scroll to zoom · drag to pan · click a person for details · arrow keys to navigate"
+    canvas_label: "Family tree: arrow keys walk between relatives, Enter opens the person card, plus and minus zoom"
+    close_panel: Close panel
     depth_label: Generations
     default_name: My Tree
     clan_link: Family tree
@@ -239,6 +298,16 @@ en:
     search_placeholder: Find a person…
     expand: Expand branch
     collapse: Collapse branch
+    add_relative: Add
+    zoom_in: Zoom in
+    zoom_out: Zoom out
+    zoom_fit: Fit the whole tree
+    print: Print the tree
+    ghost_for: "For: %{name}"
+    ghost:
+      parent: Add parent
+      partner: Add partner
+      child: Add child
 
   auth:
     sign_in_title: Sign in to Heartwood
@@ -279,6 +348,8 @@ en:
     password_instructions: "Password reset instructions sent (if user with that email address exists)."
     passwords_mismatch: Passwords did not match.
     invalid_token: Password reset link is invalid or has expired.
+    read_only: You have read-only access to this tree.
+    owners_only: Only the tree's owner can do that.
 
   mailer:
     password_reset:
@@ -322,6 +393,8 @@ en:
       models:
         person:
           attributes:
+            base:
+              tree_full: "The free plan holds up to %{limit} people per tree. Upgrade to Family to add without limits."
             avatar:
               invalid_content_type: must be a JPEG, PNG, or WebP image
               too_large: must be smaller than 5 MB

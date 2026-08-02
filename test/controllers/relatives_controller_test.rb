@@ -25,6 +25,22 @@ class RelativesControllerTest < ActionDispatch::IntegrationTest
     assert_includes @person.parents.map(&:given_names), "Mary"
   end
 
+  test "create with return_to lands back on that page (tree panel flow)" do
+    post person_relatives_url(@person), params: {
+      relation: "parent", return_to: person_tree_path(@person),
+      person: { given_names: "Mary", sex: "F" }
+    }
+    assert_redirected_to person_tree_path(@person)
+  end
+
+  test "create ignores a foreign-host return_to" do
+    post person_relatives_url(@person), params: {
+      relation: "parent", return_to: "https://evil.example/phish",
+      person: { given_names: "Mary", sex: "F" }
+    }
+    assert_redirected_to person_url(@person)
+  end
+
   test "adds a child" do
     post person_relatives_url(@person), params: {
       relation: "child", person: { given_names: "Kim", sex: "U" }
@@ -115,5 +131,18 @@ class RelativesControllerTest < ActionDispatch::IntegrationTest
     get search_person_relatives_url(@person, relation: "parent", q: "")
     assert_response :success
     assert_select "#relative_candidates button", count: 0
+  end
+
+  test "a viewer cannot add a relative" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "Person.count" do
+      post person_relatives_url(@person), params: { relation: "parent", person: { given_names: "Mary" } }
+    end
+    assert_redirected_to root_url
   end
 end

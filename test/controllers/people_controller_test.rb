@@ -26,6 +26,17 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
     assert_select "body", /Ada Lovelace/
   end
 
+  test "panel renders the compact card inside the person-panel frame" do
+    Event.create!(kind: "BIRT", eventable: @person, tree: @tree, date_raw: "1815",
+                  date_start: Date.new(1815, 12, 10), place_name: "London")
+    get panel_person_url(@person)
+    assert_response :success
+    assert_select "turbo-frame#person-panel" do
+      assert_select ".person-panel-name", text: "Ada Lovelace"
+      assert_select ".person-panel-field dd", text: /1815 · London/
+    end
+  end
+
   test "profile defaults to details tab" do
     get person_url(@person)
     assert_select ".profile-tab--active", text: /Details/i
@@ -66,6 +77,19 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
   test "index sex filter narrows results" do
     get people_url(sex: "F")
     assert_select "body", /Lovelace/
+  end
+
+  test "index defaults to surname_asc when sort is absent or unknown" do
+    get people_url
+    assert_select "select#sort option[selected][value=surname_asc]"
+
+    get people_url(sort: "not-a-real-option")
+    assert_select "select#sort option[selected][value=surname_asc]"
+  end
+
+  test "index honors a whitelisted sort param" do
+    get people_url(sort: "created_desc")
+    assert_select "select#sort option[selected][value=created_desc]"
   end
 
   test "index renders search form" do
@@ -125,5 +149,33 @@ class PeopleControllerTest < ActionDispatch::IntegrationTest
       delete person_url(@person)
     end
     assert_redirected_to people_url
+  end
+
+  test "a viewer cannot create, edit, or destroy a person" do
+    viewer = User.create!(name: "Viewer", email_address: "viewer@example.com", password: "password")
+    TreeMembership.create!(user: viewer, tree: @tree, role: "viewer")
+    sign_out
+    sign_in_as viewer
+    Current.tree = @tree
+
+    assert_no_difference "Person.count" do
+      post people_url, params: { person: { given_names: "New", surname: "Guy", sex: "U" } }
+    end
+    assert_redirected_to root_url
+
+    patch person_url(@person), params: { person: { nickname: "Sneaky" } }
+    assert_redirected_to root_url
+    assert_nil @person.reload.nickname
+
+    assert_no_difference "Person.count" do
+      delete person_url(@person)
+    end
+    assert_redirected_to root_url
+
+    # reads still work
+    get people_url
+    assert_response :success
+    get person_url(@person)
+    assert_response :success
   end
 end

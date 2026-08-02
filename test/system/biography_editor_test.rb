@@ -16,6 +16,11 @@ class BiographyEditorTest < ApplicationSystemTestCase
     # The custom element upgrades into an editable surface only when the JS mounts.
     editor = find("lexxy-editor [contenteditable='true']", wait: 10)
     editor.click  # focus the editable surface before typing, or the keys go nowhere
+    # The click focuses asynchronously; typing before focus lands is silently lost
+    # (the dominant flake in this test), so block until the surface holds focus.
+    Timeout.timeout(Capybara.default_max_wait_time) do
+      sleep 0.05 until page.evaluate_script("!!document.activeElement && document.activeElement.isContentEditable")
+    end
     editor.send_keys("A short, quiet life by the sea.")
     # Let the editor flush its content into the hidden Action Text input before submitting.
     assert_selector "lexxy-editor [contenteditable='true']", text: "quiet life", wait: 5

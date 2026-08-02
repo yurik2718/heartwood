@@ -17,6 +17,9 @@ class Person < ApplicationRecord
 
   validates :sex, inclusion: { in: SEXES }
   validate :avatar_is_an_image, if: -> { avatar.attached? }
+  # The plan cap guards every path that creates people — forms, add-relative,
+  # ghost slots, GEDCOM import — because they all go through Person.create.
+  validate :tree_has_capacity, on: :create
 
   AVATAR_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
   AVATAR_MAX_BYTES     = 5.megabytes
@@ -32,6 +35,29 @@ class Person < ApplicationRecord
         "given_names LIKE :p OR surname LIKE :p OR nickname LIKE :p",
         p: pattern
       )
+    end
+  }
+
+  # Keys for the people#index sort control (see Person.sorted below); order here is
+  # display order in the <select>. Whitelisted in the controller before use.
+  SORT_OPTIONS = %w[surname_asc surname_desc birth_asc birth_desc created_desc].freeze
+
+  # Sort the list by name, birth date, or when they were added to the tree. Birth-date
+  # sorts join each person's BIRT event (there's at most one); people without a recorded
+  # birth date sort to the end regardless of direction.
+  scope :sorted, ->(key) {
+    case key.to_s
+    when "surname_desc"
+      reorder(surname: :desc, given_names: :desc)
+    when "birth_asc", "birth_desc"
+      direction = key.to_s == "birth_asc" ? "ASC" : "DESC"
+      joins("LEFT JOIN events birth_evt ON birth_evt.eventable_id = people.id " \
+            "AND birth_evt.eventable_type = 'Person' AND birth_evt.kind = 'BIRT'")
+        .reorder(Arel.sql("birth_evt.date_start IS NULL, birth_evt.date_start #{direction}"))
+    when "created_desc"
+      reorder(created_at: :desc)
+    else
+      reorder(surname: :asc, given_names: :asc)
     end
   }
 
@@ -76,6 +102,16 @@ class Person < ApplicationRecord
   def visible_to?(user)
     return true if user && tree.users.exists?(user.id)
     !living? && !private?
+  end
+
+  # Compact lifespan for headers and tree nodes: "1799 – 1837", a lone birth year,
+  # or "† 1837" when only the death is known. Nil when no dates are recorded.
+  def life_years
+    birth_year = event_year(birth)
+    death_year = event_year(death)
+    return "#{birth_year} – #{death_year}" if birth_year && death_year
+    return birth_year.to_s if birth_year
+    "† #{death_year}" if death_year
   end
 
   # --- Derived relationships (computed through Family; see relationship.md) ---
@@ -154,7 +190,7 @@ class Person < ApplicationRecord
 
   private
 
-  def traverse_graph(depth:, neighbors:, mode:)
+  def traverse_graph(depth:, neighbors:, mode:, ghosts: true)
     persons    = {}
     gens       = {}
     orders     = {}
@@ -181,7 +217,17 @@ class Person < ApplicationRecord
     # In descendants mode this also pulls in spouses who married into the line.
     unions = collect_unions(persons:, gens:, orders:, gen_counts:, mode:)
 
-    nodes = persons.values.map { |p| node_data(p, generation: gens[p.id], order: orders[p.id]) }
+    # Dashed "add a relative" slots at the tree's growth frontier. Built before
+    # the partnered set so a ghost partner renders as the couple's second card.
+    ghost_nodes = ghosts ? collect_ghosts(persons:, gens:, orders:, gen_counts:, unions:, edges:, mode:, depth:) : []
+
+    # Couple members render as banded cards, everyone else as circles — the shape
+    # must match the JS unit grouping, so it is derived from the same unions.
+    partnered = unions.flat_map { |u| u[:partner_ids] }.to_set
+    nodes = persons.values.map do |p|
+      node_data(p, generation: gens[p.id], order: orders[p.id], partnered: partnered.include?(p.id))
+    end
+    nodes += ghost_nodes.map { |g| g.merge(partnered: partnered.include?(g[:id])) }
     { nodes:, edges:, unions:, persons:, focus_id: id, mode: }
   end
 
@@ -218,6 +264,46 @@ class Person < ApplicationRecord
     unions
   end
 
+  # Dashed placeholder nodes that invite adding a missing relative, shown only to
+  # members of the tree (viewers can't add anyone). Negative ids keep them apart
+  # from real people; the node partial links them to relatives#new.
+  #
+  # Ancestors mode: an "add parent" slot above every ancestor with no known
+  # parents (the research frontier), unless the depth cut them off. Descendants
+  # mode: "add partner" / "add child" slots for the focus person only — every
+  # other node offers the same actions through its panel without the clutter.
+  def collect_ghosts(persons:, gens:, orders:, gen_counts:, unions:, edges:, mode:, depth:)
+    return [] if depth < 1   # "just me" view — keep the depth-0 contract literal
+    return [] unless Current.user && tree.users.exists?(Current.user.id)
+
+    ghosts  = []
+    next_id = 0
+    add = lambda do |kind, for_id, gen|
+      gid = (next_id -= 1)
+      ghosts << { id: gid, ghost: kind, ghost_for: for_id,
+                  generation: gen, order: gen_counts[gen] }
+      gen_counts[gen] += 1
+      gid
+    end
+
+    if mode == "ancestors"
+      persons.each_value do |p|
+        next if gens[p.id] >= depth || p.parents.exists?
+        gid = add.call("parent", p.id, gens[p.id] + 1)
+        edges << { from_id: p.id, to_id: gid }
+      end
+    else
+      unless unions.any? { |u| u[:partner_ids].include?(id) }
+        gid = add.call("partner", id, gens[id])
+        unions << { partner_ids: [ id, gid ], child_ids: [] }
+      end
+      gid = add.call("child", id, gens[id] + 1)
+      edges << { from_id: id, to_id: gid }
+    end
+
+    ghosts
+  end
+
   # The family that anchors a person's couple block: their parents (ancestors mode)
   # or the marriage that produced the descendants we're showing (descendants mode).
   # Remarriages beyond that one are left out of v1 — see the feature doc.
@@ -245,14 +331,20 @@ class Person < ApplicationRecord
     end
   end
 
-  def node_data(person, generation:, order:)
-    base = { id: person.id, generation:, order: }
+  def node_data(person, generation:, order:, partnered: false)
+    base = { id: person.id, generation:, order:, partnered: }
     unless person.visible_to?(Current.user)
-      return base.merge(name: I18n.t("people.living"), birth_year: nil, sex: nil, living: true)
+      return base.merge(name: I18n.t("people.living"), years: nil, sex: nil, living: true)
     end
     base.merge(name: person.display_name, given: person.given_names, surname: person.surname,
-               birth_year: person.birth&.date_raw,
+               years: person.life_years,
                sex: person.sex, avatar_url: avatar_url_for(person))
+  end
+
+  # The compact year for the lifespan line: the parsed year when the date parsed,
+  # otherwise the raw string as typed ("ок. 1696").
+  def event_year(event)
+    event&.date_start&.year || event&.date_raw.presence
   end
 
   # Resolve a relative argument into a persisted Person: an existing Person is
@@ -268,6 +360,11 @@ class Person < ApplicationRecord
   def avatar_url_for(person)
     return unless person.avatar.attached?
     Rails.application.routes.url_helpers.rails_blob_path(person.avatar, only_path: true)
+  end
+
+  def tree_has_capacity
+    return unless tree&.at_people_limit?
+    errors.add(:base, :tree_full, limit: tree.people_limit)
   end
 
   def avatar_is_an_image
@@ -309,12 +406,12 @@ class Person < ApplicationRecord
 
   # --- Graph traversal for the tree view (see docs/features/family-tree-view.md) ---
 
-  def ancestor_graph(depth: 4)
-    traverse_graph(depth:, neighbors: :parents, mode: "ancestors")
+  def ancestor_graph(depth: 4, ghosts: true)
+    traverse_graph(depth:, neighbors: :parents, mode: "ancestors", ghosts:)
   end
 
-  def descendant_graph(depth: 4)
-    traverse_graph(depth:, neighbors: :children, mode: "descendants")
+  def descendant_graph(depth: 4, ghosts: true)
+    traverse_graph(depth:, neighbors: :children, mode: "descendants", ghosts:)
   end
 
   # Full display name composed from its parts (nickname is intentionally excluded).

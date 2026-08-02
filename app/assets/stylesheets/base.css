@@ -20,6 +20,10 @@ html, body {
   margin: 0;
 }
 
+/* min-height, not height — every other page still grows past the viewport and
+   scrolls normally. Only a flex-filling descendant (the tree canvas) notices. */
+body { display: flex; flex-direction: column; min-height: 100dvh; }
+
 a { color: var(--accent-ink); text-decoration: none; }
 a:hover { text-decoration: underline; }
 

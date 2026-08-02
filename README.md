@@ -2,12 +2,33 @@
 
 > The living core of your family tree — open, yours, and built to last generations.
 
-Heartwood is an open-source platform for building and preserving family trees. Run it
-on your own server for free, forever — or let us host it for you for a small fee if you'd
-rather just fill in your family's story and not think about servers.
+[![CI](https://github.com/andreiyurik/heartwood/actions/workflows/ci.yml/badge.svg)](https://github.com/andreiyurik/heartwood/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+[![Ruby](https://img.shields.io/badge/ruby-4.0-CC342D?logo=ruby&logoColor=white)](Gemfile)
+[![Rails](https://img.shields.io/badge/rails-8.1-CC0000?logo=rubyonrails&logoColor=white)](Gemfile)
+[![GEDCOM 7.0](https://img.shields.io/badge/GEDCOM-5.5.1%20%7C%207.0-8A6D3B)](docs/interop/gedcom.md)
+
+Heartwood is an **open-source, self-hostable family tree / genealogy platform** — the
+evidence-first data depth of desktop tools like Gramps, with a family editing one tree
+together from a browser instead of one person's local file. Run it on your own server for
+free, forever — or let us host it for you for a small fee if you'd rather just fill in your
+family's story and not think about servers.
 
 The name is the dense, enduring core of a tree's trunk. That's the idea: an open **core**
 you truly own, that outlives any single company or subscription.
+
+## Contents
+
+- [Screenshots](#screenshots)
+- [Works great with Gramps](#works-great-with-gramps)
+- [How Heartwood compares](#how-heartwood-compares)
+- [Philosophy](#philosophy)
+- [Open core, fair hosting](#open-core-fair-hosting)
+- [Tech stack](#tech-stack)
+- [Self-hosting](#self-hosting)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Screenshots
 
@@ -16,6 +37,24 @@ you truly own, that outlives any single company or subscription.
 | People list | Person profile | Add person |
 |:-----------:|:--------------:|:----------:|
 | [![People list](docs/screenshots/people-list.png)](docs/screenshots/people-list.png) | [![Person profile](docs/screenshots/person-profile.png)](docs/screenshots/person-profile.png) | [![Add person](docs/screenshots/add-person.png)](docs/screenshots/add-person.png) |
+
+## Works great with Gramps
+
+Heartwood is built to be **the cloud, collaborative counterpart to [Gramps](https://gramps-project.org/)** —
+not a competitor to it:
+
+```
+Family fills in the tree together in Heartwood (cloud, live, multiple relatives)
+        → export GEDCOM 7.0 / GEDZIP
+        → open in Gramps (free, local, offline — reports, DNA tools, custom filters)
+        → edit further there
+        → re-import into Heartwood, merges back into the shared cloud tree
+```
+
+We deliberately don't chase feature-parity with Gramps' deep desktop power-tools (reports,
+DNA, plugins) — we hand off to real Gramps for that instead of rebuilding it badly. What
+Heartwood adds is the thing a single-user desktop app fundamentally can't do: multiple
+relatives editing the same tree live, from a browser, with no lock-in either direction.
 
 ## How Heartwood compares
 
@@ -37,7 +76,7 @@ owns the unoccupied corner: modern UX + open + self-hostable + managed-optional,
 | GEDCOM export — no lock-in | ✅ | ✅ | ✅ | ✅ | ⚠️ limited |
 | Interactive tree view (pedigree / descendants) | ✅ | ✅ | ✅ | ⚠️ | ✅ |
 | Person profiles with life events | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Sources & citations (evidence-first) | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| Sources & citations (evidence-first, confidence levels) | ✅ | ✅ | ✅ | ⚠️ | ✅ |
 | Photo & media attachments | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Rich-text life story / biography | ✅ | ⚠️ notes | ⚠️ | ❌ | ✅ |
 | Relationship calculator | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -66,6 +105,9 @@ owns the unoccupied corner: modern UX + open + self-hostable + managed-optional,
   no build step, no Redis. Easy to deploy, easy to understand, easy to keep alive.
 - **For real people.** Intuitive enough for a grandparent to add a cousin, powerful
   enough for a serious genealogist (GEDCOM import/export, sources, media).
+- **Global by construction.** Bilingual (English + Russian) from the first release, on
+  generic Rails I18n — because a popular open-source family-tree app has to work for
+  people who don't read English.
 
 ## Open core, fair hosting
 
@@ -87,7 +129,7 @@ The "vanilla Rails" stack, on purpose:
 ## Self-hosting
 
 ```bash
-git clone https://github.com/YOUR_ORG/heartwood.git
+git clone https://github.com/andreiyurik/heartwood.git
 cd heartwood
 bin/setup
 bin/rails server
@@ -95,6 +137,20 @@ bin/rails server
 
 Open http://localhost:3000 and start your tree. Production deploy is one `kamal deploy`
 away — see `config/deploy.yml`.
+
+## Documentation
+
+The full design lives in a linked Markdown vault at [`docs/index.md`](docs/index.md) —
+domain model, GEDCOM/import-export strategy, architecture decisions (ADRs), and the
+product roadmap. It's written to be read by humans and coding agents alike, and it's the
+single source of truth: if code and docs disagree, the docs win.
+
+## Contributing
+
+Issues and pull requests are welcome. Before working on something non-trivial, please open
+an issue first to discuss the approach — it's a canonical vanilla-Rails app on purpose (see
+[`docs/architecture/stack.md`](docs/architecture/stack.md) for the hard constraints), and
+we'd rather align early than review a PR that goes against the grain of the project.
 
 ## License
 

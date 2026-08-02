@@ -12,8 +12,9 @@
 
   <% if can_edit? %>
     <%= turbo_frame_tag "add_#{relation}" do %>
-      <%= link_to t("family.add", relation: t("family.relation_singular.#{relation}")),
-            new_person_relative_path(person, relation: relation), class: "btn btn--plain add-relative" %>
+      <%= link_to new_person_relative_path(person, relation: relation), class: "btn btn--plain add-relative" do %>
+        <%= icon_tag "add" %> <%= t("family.add", relation: t("family.relation_singular.#{relation}")) %>
+      <% end %>
     <% end %>
   <% end %>
 </div>

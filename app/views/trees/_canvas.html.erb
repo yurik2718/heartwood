@@ -11,12 +11,15 @@
      data-tree-expand-label-value="<%= t("trees.expand") %>"
      data-tree-collapse-label-value="<%= t("trees.collapse") %>">
   <div class="tree-search">
-    <input type="search" class="tree-search-input"
-           data-tree-target="searchInput"
-           data-action="input->tree#search keydown->tree#searchKeys"
-           placeholder="<%= t("trees.search_placeholder") %>"
-           aria-label="<%= t("trees.search_placeholder") %>"
-           autocomplete="off">
+    <div class="search-field">
+      <%= icon_tag "search" %>
+      <input type="search" class="tree-search-input"
+             data-tree-target="searchInput"
+             data-action="input->tree#search keydown->tree#searchKeys"
+             placeholder="<%= t("trees.search_placeholder") %>"
+             aria-label="<%= t("trees.search_placeholder") %>"
+             autocomplete="off">
+    </div>
     <ul class="tree-search-results" data-tree-target="searchResults" hidden></ul>
   </div>
 

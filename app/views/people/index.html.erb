@@ -16,10 +16,13 @@
       data: { controller: "search", turbo_action: "advance" },
       class: "search-form" do |f| %>
   <div class="search-bar">
-    <%= f.search_field :q, value: @q,
-          placeholder: t("people.search_placeholder"),
-          autocomplete: "off",
-          data: { search_target: "input", action: "input->search#debounce" } %>
+    <div class="search-field">
+      <%= icon_tag "search" %>
+      <%= f.search_field :q, value: @q,
+            placeholder: t("people.search_placeholder"),
+            autocomplete: "off",
+            data: { search_target: "input", action: "input->search#debounce" } %>
+    </div>
     <%= f.select :sex,
           Person::SEXES.map { |s| [t("people.sex.#{s}"), s] },
           { include_blank: t("people.sex_filter_all"), selected: @sex },

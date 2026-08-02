@@ -287,6 +287,12 @@ main:has(.tree-page, .map-page) {
 .memories-gallery { display: flex; gap: 1rem; flex-wrap: wrap; }
 
 /* Search */
+/* Search inputs: an inset icon wherever a field means "look something up" —
+   the people list, the relationship calculator, the tree canvas. */
+.search-field { position: relative; display: flex; align-items: center; }
+.search-field .icon--search { position: absolute; left: 0.6rem; color: var(--muted); }
+.search-field input { padding-left: 1.9rem; width: 100%; }
+
 .search-form { margin-bottom: 1rem; }
 .search-bar {
   display: flex;
@@ -294,10 +300,10 @@ main:has(.tree-page, .map-page) {
   align-items: center;
   flex-wrap: wrap;
 
+  .search-field { flex: 1; min-width: 12rem; }
+
   input[type="search"] {
-    flex: 1;
-    min-width: 12rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem 0.5rem 1.9rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);
     font: inherit;

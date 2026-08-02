@@ -106,7 +106,7 @@ ru:
     children: Дети
     siblings: Братья и сёстры
     none: Нет записей.
-    add: "+ Добавить %{relation}"
+    add: "Добавить %{relation}"
     add_title: "Добавить %{relation}"
     relation_singular:
       parent: родителя
@@ -208,7 +208,7 @@ ru:
   events:
     title: Жизненные события
     none: Событий пока нет.
-    add: "+ Добавить событие"
+    add: "Добавить событие"
     kind_label: Тип
     date_label: Дата
     detail_label: Подробности
@@ -217,8 +217,8 @@ ru:
     detail_placeholder: "напр. Инженер"
     place_label: Место
     place_placeholder: "напр. Бостон, Массачусетс"
-    add_birthplace: + Место рождения
-    add_residence: + Где жил
+    add_birthplace: Место рождения
+    add_residence: Где жил
     remove_confirm: Удалить это событие?
     edit: Изменить
     remove: Удалить
@@ -240,7 +240,7 @@ ru:
       EDUC: Образование
 
   citations:
-    add: + Добавить источник
+    add: Добавить источник
     add_title: "Добавить источник для «%{event}»"
     submit_add: Сохранить источник
     sourced_badge: "✓"

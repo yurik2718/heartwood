@@ -106,7 +106,7 @@ en:
     children: Children
     siblings: Siblings
     none: None recorded.
-    add: "+ Add %{relation}"
+    add: "Add %{relation}"
     add_title: "Add %{relation}"
     relation_singular:
       parent: parent
@@ -211,7 +211,7 @@ en:
   events:
     title: Life events
     none: No events yet.
-    add: "+ Add event"
+    add: "Add event"
     kind_label: Type
     date_label: Date
     detail_label: Detail
@@ -220,8 +220,8 @@ en:
     detail_placeholder: "e.g. Engineer (for facts)"
     place_label: Place
     place_placeholder: "e.g. Boston, Massachusetts"
-    add_birthplace: + Birthplace
-    add_residence: + Where they lived
+    add_birthplace: Birthplace
+    add_residence: Where they lived
     remove_confirm: Remove this event?
     edit: Edit
     remove: Remove
@@ -243,7 +243,7 @@ en:
       EDUC: Education
 
   citations:
-    add: + Add source
+    add: Add source
     add_title: "Add source for %{event}"
     submit_add: Save source
     sourced_badge: "✓"

@@ -15,7 +15,9 @@
     <div class="actions">
       <%= link_to t("people.tree"), person_tree_path(@person), class: "btn" %>
       <% if can_edit? %>
-        <%= link_to t("people.edit_button"), edit_person_path(@person), class: "btn btn--reversed" %>
+        <%= link_to edit_person_path(@person), class: "btn btn--reversed" do %>
+          <%= icon_tag "pencil" %> <%= t("people.edit_button") %>
+        <% end %>
       <% end %>
       <%= link_to t("nav.all_people"), people_path, class: "btn btn--plain" %>
     </div>

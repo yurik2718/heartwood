@@ -23,3 +23,8 @@
 .icon--minus { --svg: url("minus.svg"); }
 .icon--copy-paste { --svg: url("copy-paste.svg"); }
 .icon--refresh { --svg: url("refresh.svg"); }
+.icon--pencil { --svg: url("pencil.svg"); }
+.icon--trash { --svg: url("trash.svg"); }
+.icon--add { --svg: url("add.svg"); }
+.icon--search { --svg: url("search.svg"); }
+.icon--check { --svg: url("check.svg"); }
